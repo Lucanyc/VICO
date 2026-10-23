@@ -1,0 +1,77 @@
+{
+  "note": "SHA-256 values of pre-refactor source files. The publication changes names, interfaces, and portability; these are not hashes of the published files. Private workspace paths are omitted.",
+  "files": [
+    {
+      "file": "table_editor.py",
+      "source_sha256": "788eaaae41e82eb4482a3df40a8564820369fd63efda3c7f5539b0f844e78ee3"
+    },
+    {
+      "file": "table_editor_typed.py",
+      "source_sha256": "8e89b9e7e807d477a92af63c85be28c145d2db10bc61f72f69dfdc45797d42c0"
+    },
+    {
+      "file": "reward.py",
+      "source_sha256": "a8ec266de31c900d27624660b9342e5f8dbd9a76c17c5dc26aaf3655ff1e1c73"
+    },
+    {
+      "file": "api_planner.py",
+      "source_sha256": "34ce06de090b343f294cbbf94f666589c92fa77664b4229b47e0c7f7d7d8e80c"
+    },
+    {
+      "file": "api_planner_calibrated.py",
+      "source_sha256": "1e8bcc307e1ed342c3899bee4d1d86212eeeab601a439bff4846c42a67a7d029"
+    },
+    {
+      "file": "local_planner.py",
+      "source_sha256": "4eb4c28fb40b87f3ed932b14b50de3b1ecff486848d5eaf60280f9bc434ce2b3"
+    },
+    {
+      "file": "table_loop.py",
+      "source_sha256": "49289d66b3cfc53ddc85aa9af2ee1798738cd99f10d51a927b1fe519972e6d6c"
+    },
+    {
+      "file": "table_loop_continuous.py",
+      "source_sha256": "c9aafc7631c17a2bc7ce78951c0fae42630dac253924fc6a731dcdd4c55d9e5b"
+    },
+    {
+      "file": "table_loop_calibrated.py",
+      "source_sha256": "4e952526c6f4645cba66fa972a53df2d8cf3542e7e1eee014773e0848e071c57"
+    },
+    {
+      "file": "table_loop_typed.py",
+      "source_sha256": "3caaa890f629ed81bb6470113b44933432121941f849fe1a9c7b08d19e7d93ea"
+    },
+    {
+      "file": "build_seed_batch.py",
+      "source_sha256": "2e9ba232d73249055a0d650867c8797f6591d194de7d3c26a9f9051aca2c5666"
+    },
+    {
+      "file": "build_rewriter_data.py",
+      "source_sha256": "4b569bd7fe4f4772963744bcd38738d747d054190754f790090c3f1b04b4db78"
+    },
+    {
+      "file": "build_solver_data_legacy.py",
+      "source_sha256": "c8b523c74fa9c25db66c07ad2d07b8714b7faa446e729f6a9e4c8c8c4a2ed8c8"
+    },
+    {
+      "file": "evaluate.py",
+      "source_sha256": "b1501218ed2e6b685fe47f5f217e0dc8e535671f0065dbc0054a2b9c079c92fa"
+    },
+    {
+      "file": "evaluate_answer_tag_legacy.py",
+      "source_sha256": "1d5ee384703f35094fdbc358eddd8daba32da02405cf231ca4231525fb96b2a9"
+    },
+    {
+      "file": "evaluate_rethink_legacy.py",
+      "source_sha256": "cfeb6cd3b4175851a33a0013d7b47788c901c52797214f0741b07849485e27c7"
+    },
+    {
+      "file": "train_rewriter.sh",
+      "source_sha256": "6e79c82df460dc42a33490b46697217e422297ce37f50fa86de824f5c62dfebc"
+    },
+    {
+      "file": "train_solver.sh",
+      "source_sha256": "689f1d27ca3627608b14812d7987452e0d3d1e0483646eb8721c3a11b00259bd"
+    }
+  ]
+}

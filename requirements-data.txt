@@ -1,0 +1,8 @@
+Pillow
+numpy
+pandas
+matplotlib
+pyarrow
+datasets
+tqdm
+openai
