@@ -4,7 +4,7 @@ GPT-5 Planner for VICO GenEnv — high-quality reasoning chains for Rewriter tra
 
 Unlike SimplePlanner (template text), GPT-5 sees the actual chart image and produces
 detailed reasoning about what to modify and why. This output is used to:
-1. Train a local Rewriter model (like visual reasoning's gpt5_planner_visual_reasoning.py → Rewriter SFT)
+1. Train a local Rewriter model (like SCENE's gpt5_planner_scene.py → Rewriter SFT)
 2. Generate better trajectories (GPT-5 reasoning > SimplePlanner templates)
 
 Interface compatible with LocalPlanner.get_plan().
@@ -76,9 +76,7 @@ Output ONLY a JSON object (no markdown, no backticks):
 {"tool": "chart_rerender", "params": {"edit_instruction": "<specific modification>"}, "reasoning": "<detailed reasoning>"}
 """
 
-    def __init__(self, api_key=None, model="gpt-5", system_prompt=None):
-        if system_prompt is not None:
-            self.SYSTEM_PROMPT = system_prompt
+    def __init__(self, api_key=None, model="gpt-5"):
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
         if not self.api_key:
             raise ValueError("Set OPENAI_API_KEY env var or pass api_key.")
@@ -232,8 +230,6 @@ Current Solver pass rate (p̂): {p_hat:.3f}
             if plan is None:
                 return None
 
-        if not isinstance(plan, dict) or not isinstance(plan.get("params", {}), dict):
-            return None
         plan.setdefault("tool", "chart_rerender")
         plan.setdefault("params", {})
         plan.setdefault("reasoning", "")

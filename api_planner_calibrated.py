@@ -30,7 +30,7 @@ from io import BytesIO
 from PIL import Image as PILImage
 
 
-class CalibratedAPIPlanner:
+class APIPlannerRound4:
 
     SYSTEM_PROMPT = """You are an expert chart editing planner (Round 4).
 

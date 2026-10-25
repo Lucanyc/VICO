@@ -29,7 +29,7 @@ set -euo pipefail
 
 ROUND=${ROUND:-0}
 VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
-: "${LLAMA_FACTORY_DIR:?Set LLAMA_FACTORY_DIR to your LLaMA-Factory checkout}"
+LLAMA_FACTORY_DIR=${LLAMA_FACTORY_DIR:-$(python3 -c "import llamafactory; import os; print(os.path.dirname(os.path.dirname(llamafactory.__file__)))" 2>/dev/null || echo "/path/to/LlamaFactory")}
 GPUS=${GPUS:-"0,1,2,3"}
 
 # ── Data paths ──
@@ -39,8 +39,7 @@ VAL_DATA=${VAL_DATA:-${VICO_DIR}/vico_rewriter_rwr_data/rewriter_rwr_val_llama.j
 # ── Model selection ──
 if [ ${ROUND} -eq 0 ]; then
     # Round 0: train from base model
-    REWRITER_BASE=${REWRITER_BASE:-${BASE_MODEL:-}}
-    : "${REWRITER_BASE:?Set REWRITER_BASE or BASE_MODEL to your local Rewriter checkpoint}"
+    REWRITER_BASE=${REWRITER_BASE:-/path/to/models/Qwen3-VL-8B-Instruct}
 else
     # Round 1+: train from previous round's merged rewriter
     PREV_ROUND=$((ROUND - 1))
@@ -159,7 +158,7 @@ mkdir -p "$(dirname ${YAML_PATH})"
 cat > ${YAML_PATH} << EOF
 ### Model
 model_name_or_path: ${REWRITER_BASE}
-template: ${MODEL_TEMPLATE:-qwen3_vl}
+template: qwen3_vl
 ### Method
 stage: sft
 do_train: true
@@ -237,7 +236,7 @@ for path in ['${TRAIN_DATA}', '${VAL_DATA}']:
 echo ""
 echo "Starting training..."
 cd ${LLAMA_FACTORY_DIR}
-CUDA_VISIBLE_DEVICES=${GPUS} llamafactory-cli train ${YAML_PATH}
+CUDA_VISIBLE_DEVICES=${GPUS} llamafactory-cli train ${YAML_PATH} "$@"
 
 # ── Done ──
 echo ""
@@ -249,7 +248,7 @@ echo "  To merge LoRA into full model:"
 echo "    llamafactory-cli export \\"
 echo "      --model_name_or_path ${REWRITER_BASE} \\"
 echo "      --adapter_name_or_path ${OUTPUT_DIR} \\"
-echo "      --template ${MODEL_TEMPLATE:-qwen3_vl} \\"
+echo "      --template qwen3_vl \\"
 echo "      --finetuning_type lora \\"
 echo "      --export_dir ${VICO_DIR}/vico_rewriter_round${ROUND}_merged"
 echo "============================================================"

@@ -1,8 +1,9 @@
-# Rewritten visual-QA data
+# Rewritten data
 
-The separately prepared archive has 41,495 unique QA records and 41,481 unique
-images. This repository contains processing code; it does not contain the archive,
-original seed data, model weights, or experiment outputs.
+The separate archive contains 41,495 unique QA records and 41,481 unique generated
+images from 16 source runs. It includes all valid saved editing turns, not only
+final selections or samples in a preferred difficulty band. It contains no
+original seed images.
 
 | Subset | QA records | Images |
 | --- | ---: | ---: |
@@ -12,28 +13,40 @@ original seed data, model weights, or experiment outputs.
 | Earlier image tools | 248 | 246 |
 | Total | 41,495 | 41,481 |
 
-`samples.jsonl` uses `id`, `image`, `question`, `answer`, and optional `provenance`.
-Image paths are relative to the extracted directory. Additional files include
-`images/`, subset ID lists, `summary.json`, `image_manifest.json`, and counts.
-The total includes saved successful intermediate edits, not just final selections.
-Some historical runs did not save edited CSVs; their images can be used for
-Solver training/evaluation but are not sufficient to restart table editing.
+The metadata is `samples.jsonl`, with `id`, `image`, `question`, `answer`, and
+`provenance`. Images are relative to the archive root. The archive is unchanged
+by the source-code reorganization and is not stored in Git.
 
-```bash
-python tools/verify_dataset.py /path/to/rewritten-dataset
-python tools/prepare_rewritten_training.py \
-  --dataset-root /path/to/rewritten-dataset --subset coevolution \
-  --output-dir outputs/training
+To use every packaged record with the original Parquet writer, adapt only the
+metadata field names and call the source function:
+
+```python
+import json, random
+from pathlib import Path
+from build_solver_data import samples_to_parquet
+
+root = Path('/path/to/rewritten-dataset').resolve()
+samples = []
+for line in (root / 'samples.jsonl').read_text().splitlines():
+    row = json.loads(line)
+    image = (root / row['image']).resolve()
+    assert root in image.parents and image.is_file()
+    samples.append({
+        'image_path': str(image), 'question': row['question'],
+        'answer': str(row['answer']), 'sample_id': row['id'],
+        'p_hat': row['provenance'][0].get('p_hat', -1), 'source': 'genenv',
+    })
+random.seed(42)
+random.shuffle(samples)
+samples_to_parquet(samples, 'outputs/all_rewrites/solver_grpo.parquet')
 ```
 
-The converter defaults to `--subset all`; an explicit subset reads
-`subsets/NAME.txt`. It groups source image IDs and shared generated images before
-splitting. A connected group cannot occur in both train and validation. Preserve
-`provenance[].original_image_id` when converting other edited datasets so edits of
-the same seed remain grouped. Without provenance, grouping uses generated image
-paths only. `--format jsonl` writes portable splits; Parquet resolves image paths
-on the conversion machine. `--data-source` and `--system-prompt-file` configure
-training metadata and instructions.
+This performs no historical pass-rate filtering and uses the original writer's
+validation behavior. `--n_original 0` in the trajectory CLI disables random
+original-example mixing, but its `already_good` branch can still select seed
+images. Using the packaged metadata above avoids those seed images.
 
-RWR requires the images actually presented to each Planner turn, including seed
-images for first turns. These seed images must be obtained separately.
+Rewriter training requires trajectories and the images shown to the Planner,
+including seed images for first turns. A rewritten-image archive alone cannot
+reconstruct all Rewriter training inputs; supply the original training images
+separately when running `build_rewriter_data.py`.

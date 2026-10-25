@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
-"""Evaluate visual question answering with configurable schema, prompt and metric."""
+"""
+Evaluate Qwen3-VL on VICO test set — vanilla variant.
+
+Same pipeline as evaluate_answer_tag.py, but uses a minimal single-line prompt
+that asks the model to put its answer directly inside \\boxed{}. Answer
+extraction is correspondingly switched to pull the last \\boxed{...}.
+
+Usage:
+    CUDA_VISIBLE_DEVICES=0 python3 evaluate.py \
+        --model_path /path/to/models/Qwen3-VL-8B-Instruct \
+        --data_json /path/to/dataset/vico/converted_test/vico_vlmgym_format.json \
+        --image_root /path/to/dataset/vico \
+        --output evaluate_results.json
+"""
+
 import os, json, re, argparse, time
 from pathlib import Path
+from vllm import LLM, SamplingParams
 from tqdm import tqdm
-from vico.data import load_samples, resolve_image, save_json
-from vico.metrics import PROMPTS, extract_answer, matches
 
 
 # -------- edit this prompt to your liking ----------------------------------
-SYSTEM_PROMPT = PROMPTS["boxed"]
+SYSTEM_PROMPT = (
+    "Please answer the question about the given chart/table/image with step-by-step reasoning"
+    "and put your answer into \\boxed{}"
+)
 
 
 # Model shortcuts. Extend as you add more local checkpoints.
-MODELS_DIR = os.environ.get("VICO_MODELS_DIR", "./models")
-
 MODEL_ALIASES = {
-    "qwen3vl8b":       os.path.join(MODELS_DIR, "Qwen3-VL-8B-Instruct"),
-    "qwen2.5vl7b":     os.path.join(MODELS_DIR, "Qwen2.5-VL-7B-Instruct"),
-    "internvl3-8b":    os.path.join(MODELS_DIR, "InternVL3-8B-Instruct"),
-    "openvlthinker7b": os.path.join(MODELS_DIR, "OpenVLThinker-7B"),
+    "qwen3vl8b":       "/path/to/models/Qwen3-VL-8B-Instruct",
+    "qwen2.5vl7b":     "/path/to/models/Qwen2.5-VL-7B-Instruct",
+    "internvl3-8b":    "/path/to/models/InternVL3-8B-Instruct",
+    "openvlthinker7b": "/path/to/models/OpenVLThinker-7B",
 }
 
 
@@ -64,90 +78,201 @@ def mm_kwargs_for(model_path: str) -> dict:
     return {}
 
 
+# Brace-balanced \boxed{...} extractor (handles nested braces like \frac{a}{b}).
+_BOXED_START = re.compile(r"\\boxed\s*{")
+
+
+def extract_answer(text):
+    """Return the content of the last \\boxed{...}, or None."""
+    if not text:
+        return None
+    last = None
+    for m in _BOXED_START.finditer(text):
+        i = m.end()
+        depth, buf = 1, []
+        while i < len(text) and depth > 0:
+            c = text[i]
+            if c == "{":
+                depth += 1
+                buf.append(c)
+            elif c == "}":
+                depth -= 1
+                if depth == 0:
+                    break
+                buf.append(c)
+            else:
+                buf.append(c)
+            i += 1
+        if depth == 0:
+            last = "".join(buf).strip()
+    return last
+
+
+def relaxed_match(pred, gt):
+    """VICO relaxed accuracy: exact match or within 5% for numbers."""
+    if pred is None:
+        return False
+    pred, gt = pred.strip().lower(), gt.strip().lower()
+    # strip common LaTeX wrappers so '\text{42}' == '42'
+    pred = re.sub(r"\\text\s*\{([^}]*)\}", r"\1", pred).strip()
+    pred = pred.strip("$").strip()
+    if pred == gt:
+        return True
+    try:
+        p, g = float(pred), float(gt)
+        return abs(p - g) <= abs(g) * 0.05 + 1e-9
+    except (ValueError, TypeError):
+        return False
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--model", "--model_path", dest="model", required=True)
-    parser.add_argument("--data", "--data_json", dest="data", required=True)
-    parser.add_argument("--image-root", "--image_root", dest="image_root", required=True)
-    parser.add_argument("--field-map", type=Path, help="JSON mapping canonical fields to source columns")
-    parser.add_argument("--output", default="outputs/evaluation.json")
-    parser.add_argument("--prompt-style", choices=list(PROMPTS), default="boxed")
-    parser.add_argument("--system-prompt-file", type=Path)
-    parser.add_argument("--metric", choices=["exact", "relaxed"], default="relaxed")
-    parser.add_argument("--tolerance", type=float, default=0.05)
-    parser.add_argument("--n", type=int, default=-1)
-    parser.add_argument("--batch-size", "--batch_size", type=int, default=8)
-    parser.add_argument("--max-tokens", "--max_tokens", type=int, default=4096)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_path", required=True,
+                        help=f"alias ({' | '.join(MODEL_ALIASES)}) or local model path")
+    parser.add_argument("--data_json", required=True)
+    parser.add_argument("--image_root", required=True,
+                        help="Root dir for image_path (e.g. /path/to/vico)")
+    parser.add_argument("--output", default=None,
+                        help="default: evaluate_<model-tag>.json")
+    parser.add_argument("--n", type=int, default=-1, help="Number of samples (-1 = all)")
+    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--max_tokens", type=int, default=4096)
     parser.add_argument("--temperature", type=float, default=0.7)
-    parser.add_argument("--tp", type=int, default=1)
-    parser.add_argument("--gpu-memory-utilization", type=float, default=0.85)
-    parser.add_argument("--max-model-len", type=int, default=8192)
-    parser.add_argument("--enforce-eager", action="store_true", help="Skip CUDA graphs for small smoke runs")
-    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--tp", type=int, default=1, help="Tensor parallel size")
+    parser.add_argument("--resume", action="store_true", help="Resume from existing output file")
     args = parser.parse_args()
-    if args.batch_size < 1 or args.max_tokens < 1 or args.tolerance < 0:
-        parser.error("Invalid batch size, token limit, or tolerance")
-    model, model_tag = resolve_model(args.model)
-    field_map = json.loads(args.field_map.read_text()) if args.field_map else None
-    data = load_samples(args.data, field_map)
+
+    # Resolve model + derive default output name from the tag.
+    model_path, model_tag = resolve_model(args.model_path)
+    args.model_path = model_path
+    if args.output is None:
+        args.output = f"evaluate_{model_tag}.json"
+    print(f"model: {model_path}  (tag={model_tag})")
+    print(f"out  : {args.output}")
+
+    # Load data
+    with open(args.data_json) as f:
+        data = json.load(f)
     if args.n > 0:
         data = data[:args.n]
-    for sample in data:
-        sample["full_image"] = str(resolve_image(sample, args.image_root))
-    if not data:
-        parser.error("No evaluation samples selected")
-    prompt = args.system_prompt_file.read_text() if args.system_prompt_file else PROMPTS[args.prompt_style]
-    config = {"model": str(Path(model).resolve()), "data": str(Path(args.data).resolve()),
-              "prompt": prompt, "prompt_style": args.prompt_style, "metric": args.metric,
-              "tolerance": args.tolerance, "max_tokens": args.max_tokens,
-              "temperature": args.temperature, "field_map": field_map,
-              "image_root": str(Path(args.image_root).resolve())}
-    output = Path(args.output)
-    results = []
-    if output.exists():
-        if not args.resume:
-            parser.error("Output already exists; use --resume or another output path")
-        previous = json.loads(output.read_text())
-        if previous.get("config") != config:
-            parser.error("Resume configuration differs from the saved run")
-        results = previous["results"]
-    selected = {s["id"] for s in data}
-    if any(r["id"] not in selected for r in results):
-        parser.error("Saved results include samples outside this selection")
-    done = {r["id"] for r in results}
-    todo = [s for s in data if s["id"] not in done]
-    if not todo:
-        print(f"Complete: {len(results)} saved samples; no model load needed")
-        return
-    from vllm import LLM, SamplingParams
-    llm = LLM(model=model, tensor_parallel_size=args.tp,
-              gpu_memory_utilization=args.gpu_memory_utilization, dtype="bfloat16",
-              trust_remote_code=True, max_model_len=args.max_model_len,
-              limit_mm_per_prompt={"image": 1},
-              allowed_local_media_path=str(Path(args.image_root).resolve()),
-              mm_processor_kwargs=mm_kwargs_for(model), enforce_eager=args.enforce_eager)
-    sampling = SamplingParams(max_tokens=args.max_tokens, temperature=args.temperature)
-    start = time.time()
-    for index in tqdm(range(0, len(todo), args.batch_size), desc="Evaluating"):
-        batch = todo[index:index + args.batch_size]
-        messages = [[{"role": "system", "content": prompt},
-                     {"role": "user", "content": [
-                         {"type": "image_url", "image_url": {"url": Path(s["full_image"]).as_uri()}},
-                         {"type": "text", "text": s["question"]}]}] for s in batch]
-        outputs = llm.chat(messages, sampling_params=sampling)
-        if len(outputs) != len(batch):
-            raise RuntimeError("Inference returned the wrong number of outputs")
-        for sample, out in zip(batch, outputs):
-            response = out.outputs[0].text
-            prediction = extract_answer(response, args.prompt_style)
-            results.append({"id": sample["id"], "question": sample["question"],
-                            "gt": sample["answer"], "pred": prediction,
-                            "correct": matches(prediction, sample["answer"], args.metric, args.tolerance),
-                            "response": response})
-        correct = sum(r["correct"] for r in results)
-        save_json(output, {"config": config, "total": len(results), "correct": correct,
-                           "accuracy": 100 * correct / len(results), "results": results})
-    print(f"Completed {len(results)} samples in {time.time() - start:.1f}s: {output}")
+    print(f"Loaded {len(data)} samples")
+
+    # Filter samples with valid images
+    valid = []
+    for s in data:
+        img_path = os.path.join(args.image_root, s["image_path"])
+        if os.path.exists(img_path):
+            s["_full_image_path"] = img_path
+            valid.append(s)
+    print(f"Valid samples (image exists): {len(valid)}")
+
+    # Resume: load existing results and skip done samples
+    done_ids = set()
+    prev_results = []
+    if args.resume and os.path.exists(args.output):
+        with open(args.output) as f:
+            prev = json.load(f)
+        prev_results = prev.get("results", [])
+        done_ids = {r["id"] for r in prev_results}
+        print(f"Resume: {len(done_ids)} already done")
+        valid = [s for s in valid if s["id"] not in done_ids]
+        print(f"Remaining: {len(valid)}")
+
+    # Load model
+    print(f"Loading model: {args.model_path}")
+    allowed_path = os.path.realpath(args.image_root)
+    mm_kwargs = mm_kwargs_for(args.model_path)
+    print(f"mm_processor_kwargs: {mm_kwargs}")
+    llm = LLM(
+        model=args.model_path,
+        tensor_parallel_size=args.tp,
+        gpu_memory_utilization=0.85,
+        dtype="bfloat16",
+        trust_remote_code=True,
+        max_model_len=8192,
+        limit_mm_per_prompt={"image": 1},
+        allowed_local_media_path=allowed_path,
+        mm_processor_kwargs=mm_kwargs,
+    )
+    sampling_params = SamplingParams(
+        max_tokens=args.max_tokens,
+        temperature=args.temperature,
+    )
+
+    # Init results from resume
+    results = list(prev_results)
+    correct = sum(1 for r in results if r["correct"])
+    total = len(results)
+    t0 = time.time()
+
+    for i in tqdm(range(0, len(valid), args.batch_size), desc="Evaluating"):
+        batch = valid[i:i + args.batch_size]
+        messages_batch = []
+        for s in batch:
+            messages = [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": [
+                    {"type": "image_url", "image_url": {
+                        "url": f"file://{os.path.realpath(s['_full_image_path'])}"}},
+                    {"type": "text", "text": s["question"]},
+                ]},
+            ]
+            messages_batch.append(messages)
+
+        outputs = llm.chat(messages_batch, sampling_params=sampling_params)
+
+        for s, out in zip(batch, outputs):
+            resp = out.outputs[0].text
+            pred = extract_answer(resp)
+            gt = str(s["answer"])
+            match = relaxed_match(pred, gt)
+            correct += int(match)
+            total += 1
+
+            results.append({
+                "id": s["id"],
+                "question": s["question"],
+                "gt": gt,
+                "pred": pred,
+                "correct": match,
+                "response": resp,
+            })
+
+        # Print running accuracy and incremental save
+        acc = correct / total * 100
+        tqdm.write(f"  [{total}/{total + len(valid) - i - len(batch)}] acc={acc:.1f}%")
+
+        # Save after each batch (so resume works if crash)
+        with open(args.output, "w") as f:
+            json.dump({"model": args.model_path, "total": total, "correct": correct,
+                        "accuracy": round(acc, 2), "results": results},
+                      f, ensure_ascii=False, indent=2)
+
+    # Summary
+    elapsed = time.time() - t0
+    acc = correct / total * 100 if total > 0 else 0
+    print(f"\n{'='*60}")
+    print(f"VICO Evaluation Results (vanilla \\boxed{{}} prompt)")
+    print(f"  Model: {args.model_path}")
+    print(f"  Samples: {total}")
+    print(f"  Relaxed Accuracy: {correct}/{total} = {acc:.1f}%")
+    print(f"  Time: {elapsed:.0f}s ({elapsed/total:.1f}s/sample)")
+    print(f"  Output: {args.output}")
+    print(f"{'='*60}")
+
+    # Save
+    summary = {
+        "model": args.model_path,
+        "prompt": SYSTEM_PROMPT,
+        "total": total,
+        "correct": correct,
+        "accuracy": round(acc, 2),
+        "time_s": round(elapsed, 1),
+        "results": results,
+    }
+    with open(args.output, "w") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=2)
+    print(f"Saved to {args.output}")
 
 
 if __name__ == "__main__":

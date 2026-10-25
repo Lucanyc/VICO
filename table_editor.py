@@ -84,21 +84,21 @@ Output format:
             api_key = os.environ.get("OPENAI_API_KEY")
             base_url = os.environ.get("OPENAI_BASE_URL")
             if not api_key:
-                print("[TableEditor] No OPENAI_API_KEY")
+                print("[VICOGen] No OPENAI_API_KEY")
                 return
             kwargs = {"api_key": api_key}
             if base_url:
                 kwargs["base_url"] = base_url
             self._client = OpenAI(**kwargs)
-            print("[TableEditor] GPT-5.2 client initialized")
+            print("[VICOGen] GPT-5.2 client initialized")
         except Exception as e:
-            print(f"[TableEditor] Client init failed: {e}")
+            print(f"[VICOGen] Client init failed: {e}")
 
     def load_csv(self, csv_path: str) -> Optional[pd.DataFrame]:
         try:
             return pd.read_csv(csv_path)
         except Exception as e:
-            print(f"  [TableEditor] CSV read error: {e}")
+            print(f"  [VICOGen] CSV read error: {e}")
             return None
 
     def extract_answer(self, df: pd.DataFrame, answer_cell: Dict,
@@ -162,7 +162,7 @@ Output format:
             data = obj.get("data", [])
             return pd.DataFrame(data, columns=columns)
         except Exception as e:
-            print(f"  [TableEditor] JSON parse error: {e}")
+            print(f"  [VICOGen] JSON parse error: {e}")
             return None
 
     def _modify_csv(self, df: pd.DataFrame, question: str,
@@ -219,20 +219,20 @@ Output format:
                     has_numeric = True
                     break
             if not has_numeric:
-                print(f"  [TableEditor] Modified CSV has no numeric columns after cleaning, rejecting")
+                print(f"  [VICOGen] Modified CSV has no numeric columns after cleaning, rejecting")
                 for col in modified_df.columns[1:]:
                     print(f"    {col}: {modified_df[col].head(3).tolist()}")
                 return None
 
             # Validate: not empty
             if len(modified_df) < 1:
-                print(f"  [TableEditor] Modified CSV is empty, rejecting")
+                print(f"  [VICOGen] Modified CSV is empty, rejecting")
                 return None
 
-            print(f"  [TableEditor] GPT-5.2 output: {len(modified_df)} rows, {len(modified_df.columns)} cols")
+            print(f"  [VICOGen] GPT-5.2 output: {len(modified_df)} rows, {len(modified_df.columns)} cols")
             return modified_df
         except Exception as e:
-            print(f"  [TableEditor] GPT-5.2 error: {e}")
+            print(f"  [VICOGen] GPT-5.2 error: {e}")
             return None
 
     def render_chart(self, df: pd.DataFrame, output_path: str,
@@ -335,7 +335,7 @@ Output format:
             plt.close(fig)
             return os.path.exists(output_path) and os.path.getsize(output_path) > 0
         except Exception as e:
-            print(f"  [TableEditor] Render error: {e}")
+            print(f"  [VICOGen] Render error: {e}")
             plt.close(fig)
             return False
 
@@ -375,7 +375,6 @@ Output format:
                 result["success"] = True
                 result["new_answer"] = original_answer
                 result["n_rows_after"] = len(df)
-                result["table_path"] = os.path.abspath(csv_path)
             else:
                 result["error"] = "Render failed"
             return result
@@ -384,7 +383,7 @@ Output format:
         entity_value = None
         if answer_cell:
             entity_value = self.get_entity_value(df, answer_cell)
-            print(f"  [TableEditor] Entity at answer row: '{entity_value}'")
+            print(f"  [VICOGen] Entity at answer row: '{entity_value}'")
 
         # Tier 1: modify CSV data via GPT-5.2
         modified_df = self._modify_csv(df, question, edit_instruction,
@@ -402,7 +401,7 @@ Output format:
             if new_answer is None:
                 # Entity was deleted or renamed — reject this modification
                 result["error"] = f"Entity '{entity_value}' not found in modified CSV"
-                print(f"  [TableEditor] REJECTED: entity '{entity_value}' lost after modification")
+                print(f"  [VICOGen] REJECTED: entity '{entity_value}' lost after modification")
                 return result
 
             # Verify: entity still matches
@@ -414,12 +413,12 @@ Output format:
                     result["error"] = f"Entity '{entity_value}' deleted by GPT-5.2"
                     return result
                 if len(matches) > 1:
-                    print(f"  [TableEditor] WARNING: entity '{entity_value}' appears {len(matches)} times, using first")
+                    print(f"  [VICOGen] WARNING: entity '{entity_value}' appears {len(matches)} times, using first")
         else:
             new_answer = original_answer
 
         result["new_answer"] = new_answer
-        print(f"  [TableEditor] Answer: {original_answer} → {new_answer} "
+        print(f"  [VICOGen] Answer: {original_answer} → {new_answer} "
               f"(entity='{entity_value}'), rows: {len(df)} → {len(modified_df)}")
 
         # Render
@@ -430,9 +429,25 @@ Output format:
             return result
 
         result["success"] = True
-        # Keep the edited table with the image so the next turn uses the same
-        # state as the image and answer seen by the Planner and Solver.
-        table_path = os.path.splitext(output_path)[0] + ".csv"
-        modified_df.to_csv(table_path, index=False)
-        result["table_path"] = os.path.abspath(table_path)
         return result
+
+
+if __name__ == "__main__":
+    gen = TableEditor()
+
+    # Quick test with a real CSV
+    import glob
+    tables = glob.glob("/path/to/dataset/vico/train/tables/*.csv")
+    if tables:
+        csv_path = tables[0]
+        df = gen.load_csv(csv_path)
+        if df is not None:
+            print(f"\nTest CSV: {csv_path}")
+            print(f"Shape: {df.shape}")
+            print(f"Columns: {list(df.columns)}")
+            print(df.head())
+
+            # Test answer extraction
+            cell = {"row": 0, "col": df.columns[1]}
+            answer = gen.extract_answer(df, cell)
+            print(f"\nAnswer at {cell}: {answer}")

@@ -2,7 +2,7 @@
 """
 Build Rewriter RWR Training Data from VICO GenEnv Trajectories
 
-Same logic as build_rewriter_rwr_genenv_data.py (visual reasoning), adapted for VICO:
+Same logic as build_rewriter_rwr_genenv_data.py (SCENE), adapted for VICO:
   - imgname → full path via --png_dir
   - answer changes per turn (GenEnv mode)
   - RWR weight: exp(-β(p̂ - 0.5)²)
@@ -10,7 +10,7 @@ Same logic as build_rewriter_rwr_genenv_data.py (visual reasoning), adapted for 
 Usage:
     python3 build_rewriter_data.py \
         --traj_files vico_genenv_test/trajectories_*.json \
-        --png_dir /path/to/vico/train/png \
+        --png_dir /path/to/dataset/vico/train/png \
         --output_dir vico_rewriter_rwr \
         --beta 4.0 --max_repeats 5
 """
@@ -20,8 +20,26 @@ from collections import Counter
 from PIL import Image
 
 
-from local_planner import LocalPlanner
-SYSTEM_PROMPT = LocalPlanner.SYSTEM_PROMPT
+SYSTEM_PROMPT = """You are an expert chart editing planner.
+
+Your task: choose one editing action to move a Solver model's pass rate (p̂) closer to 0.5.
+
+Available tools:
+- chart_rerender(edit_instruction): modify the chart's underlying data table and re-render with matplotlib.
+
+When using chart_rerender:
+- To make harder: add distractor rows with near-miss values, change the answer value, increase chart density
+- To make easier: simplify the chart, remove confusing data points, make the answer more distinct
+- Be specific in edit instructions
+
+First think step-by-step about what edit to apply, then output the tool call.
+Your response format:
+<think>
+your reasoning
+</think>
+<tool_call>
+{"tool": "chart_rerender", "params": {"edit_instruction": "your specific edit instruction"}}
+</tool_call>"""
 
 
 def compute_rwr_weight(p_hat, alpha=0.5, beta=4.0):
@@ -64,15 +82,15 @@ def build_user_message(question, answer, p_hat, history):
     if history:
         msg += "\nEdit history (cumulative):\n"
         for i, h in enumerate(history, 1):
-            tool = h.get("tool", "edit")
+            tool = h.get("tool", "chart_rerender")
             instr = h.get("params", {}).get("edit_instruction", "")[:60]
             p_val = h.get("p_hat", "?")
             p_str = f"{p_val:.3f}" if isinstance(p_val, (int, float)) else str(p_val)
             err = h.get("error", "")
             err_str = f" [FAILED: {err[:40]}]" if err else ""
-            msg += f'  Step {i}: {tool}("{instr}...") → p̂={p_str}{err_str}\n'
+            msg += f'  Step {i}: chart_rerender("{instr}...") → p̂={p_str}{err_str}\n'
     else:
-        msg += "\nNo edits applied yet. This is the original image.\n"
+        msg += "\nNo edits applied yet. This is the original chart.\n"
 
     msg += "\nDecide the next edit."
     return msg
@@ -84,7 +102,7 @@ def build_assistant_message(plan):
     if not reasoning:
         reasoning = "Selecting the best modification based on current p̂."
 
-    tool = plan.get("tool", "edit")
+    tool = plan.get("tool", "chart_rerender")
     params = plan.get("params", {})
     if "edit_instruction" in params:
         params = dict(params)
@@ -139,7 +157,7 @@ def get_phat_for_turn(traj, turn_idx):
     return traj.get("p_hat_original", 0.5)
 
 
-def build_samples(trajs, beta, max_repeats, png_dir, system_prompt=SYSTEM_PROMPT):
+def build_samples(trajs, beta, max_repeats, png_dir):
     samples = []
     stats = Counter()
 
@@ -162,7 +180,7 @@ def build_samples(trajs, beta, max_repeats, png_dir, system_prompt=SYSTEM_PROMPT
             if not turn.get("exec_success"):
                 stats["skip_exec_failed"] += 1
                 history.append({
-                    "tool": turn.get("plan", {}).get("tool", "edit"),
+                    "tool": turn.get("plan", {}).get("tool", "chart_rerender"),
                     "params": turn.get("plan", {}).get("params", {}),
                     "p_hat": None,
                     "error": turn.get("exec_error", "failed"),
@@ -180,33 +198,32 @@ def build_samples(trajs, beta, max_repeats, png_dir, system_prompt=SYSTEM_PROMPT
             if repeats == 0:
                 stats["zero_weight_dropped"] += 1
                 history.append({
-                    "tool": turn.get("plan", {}).get("tool", "edit"),
+                    "tool": turn.get("plan", {}).get("tool", "chart_rerender"),
                     "params": turn.get("plan", {}).get("params", {}),
                     "p_hat": out_p,
                 })
                 continue
 
-            image_path = turn.get("input_image") or get_image_for_turn(traj, turn_idx, png_dir)
+            image_path = get_image_for_turn(traj, turn_idx, png_dir)
             if not is_valid_image(image_path):
                 stats["skip_bad_image"] += 1
                 continue
 
-            input_answer = turn.get("input_answer", get_answer_for_turn(traj, turn_idx))
-            input_phat = turn.get("input_phat", get_phat_for_turn(traj, turn_idx))
+            input_answer = get_answer_for_turn(traj, turn_idx)
+            input_phat = get_phat_for_turn(traj, turn_idx)
 
-            user_text = build_user_message(turn.get("input_question", question), input_answer, input_phat, history)
+            user_text = build_user_message(question, input_answer, input_phat, history)
             assistant_text = build_assistant_message(turn["plan"])
 
             sample = {
                 "conversations": [
-                    {"from": "system", "value": system_prompt},
+                    {"from": "system", "value": SYSTEM_PROMPT},
                     {"from": "human", "value": f"<image>\n{user_text}"},
                     {"from": "gpt", "value": assistant_text},
                 ],
                 "images": [image_path],
                 "meta": {
                     "sample_id": traj.get("sample_id", ""),
-                    "source_image": traj.get("imgname", traj.get("sample_id", "")),
                     "turn": turn.get("turn", turn_idx + 1),
                     "input_phat": input_phat,
                     "output_phat": out_p,
@@ -226,7 +243,7 @@ def build_samples(trajs, beta, max_repeats, png_dir, system_prompt=SYSTEM_PROMPT
                 stats["sweet_zone"] += 1
 
             history.append({
-                "tool": turn.get("plan", {}).get("tool", "edit"),
+                "tool": turn.get("plan", {}).get("tool", "chart_rerender"),
                 "params": turn.get("plan", {}).get("params", {}),
                 "p_hat": out_p,
             })
@@ -237,9 +254,8 @@ def build_samples(trajs, beta, max_repeats, png_dir, system_prompt=SYSTEM_PROMPT
 def main():
     parser = argparse.ArgumentParser(description="Build VICO Rewriter RWR data")
     parser.add_argument("--traj_files", nargs="+", required=True)
-    parser.add_argument("--png_dir", default="",
-                        help="Root for relative legacy trajectory image paths")
-    parser.add_argument("--system-prompt-file")
+    parser.add_argument("--png_dir", required=True,
+                        help="Directory with original chart PNGs")
     parser.add_argument("--output_dir", required=True)
     parser.add_argument("--beta", type=float, default=4.0)
     parser.add_argument("--max_repeats", type=int, default=5)
@@ -277,8 +293,7 @@ def main():
 
     # Build samples
     print(f"\nBuilding RWR samples (beta={args.beta}, max_repeats={args.max_repeats})...")
-    system_prompt = open(args.system_prompt_file).read() if args.system_prompt_file else SYSTEM_PROMPT
-    samples, stats = build_samples(trajs, args.beta, args.max_repeats, args.png_dir, system_prompt)
+    samples, stats = build_samples(trajs, args.beta, args.max_repeats, args.png_dir)
 
     # Summary
     print(f"\n{'='*60}")
@@ -311,19 +326,10 @@ def main():
     print("Saving")
     print(f"{'='*60}")
 
-    # Split by source image before assigning oversampled turns.
-    if not 0 < args.train_ratio < 1:
-        raise ValueError("train_ratio must be in (0, 1)")
-    groups = sorted({s["meta"]["source_image"] for s in samples})
-    if len(groups) < 2:
-        raise ValueError("At least two source images are required for a disjoint split")
-    random.shuffle(groups)
-    cut = max(1, min(len(groups) - 1, int(len(groups) * args.train_ratio)))
-    train_groups = set(groups[:cut])
-    train = [s for s in samples if s["meta"]["source_image"] in train_groups]
-    val = [s for s in samples if s["meta"]["source_image"] not in train_groups]
-    random.shuffle(train)
-    random.shuffle(val)
+    random.shuffle(samples)
+    n_train = int(len(samples) * args.train_ratio)
+    train = samples[:n_train]
+    val = samples[n_train:]
 
     for split, data in [("train", train), ("val", val)]:
         llama = [{"conversations": s["conversations"], "images": s["images"]} for s in data]

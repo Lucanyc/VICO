@@ -2,7 +2,7 @@
 """
 VICO Reward Function for verl GRPO
 
-Binary reward following configurable exact or relative numeric matching:
+Binary reward following VICO relaxed accuracy conventions:
   +1.0 if format correct AND answer correct
   -1.0 otherwise
 
@@ -86,7 +86,7 @@ def extract_answer(text):
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  Answer normalization and checking
+#  Answer normalization and checking (VICO style)
 # ═══════════════════════════════════════════════════════════════════
 
 def normalize_text(s):
@@ -128,23 +128,57 @@ def try_parse_number(s):
         return False, None
 
 
-def check_correct(gt, pred, metric="relaxed", tolerance=0.05):
-    from vico.metrics import matches
-    return matches(pred, gt, metric, tolerance)
+def check_correct(gt, pred):
+    """
+    VICO relaxed accuracy:
+      - Numeric: 5% relative tolerance
+      - Text: normalized exact match
+    """
+    gt_str = str(gt).strip()
+    pred_str = str(pred).strip()
+
+    if not pred_str:
+        return False
+
+    # Try numeric comparison first
+    gt_is_num, gt_num = try_parse_number(gt_str)
+    pred_is_num, pred_num = try_parse_number(pred_str)
+
+    if gt_is_num and pred_is_num:
+        if gt_num == 0:
+            return abs(pred_num) < 1e-6
+        return abs(gt_num - pred_num) / abs(gt_num) <= 0.05
+
+    # Text comparison with normalization
+    gt_norm = normalize_text(gt_str)
+    pred_norm = normalize_text(pred_str)
+
+    if gt_norm == pred_norm:
+        return True
+
+    # Also check if pred contains gt or vice versa (for short GT like country names)
+    # Only when GT is short (≤3 words) to avoid false positives
+    if len(gt_norm.split()) <= 3:
+        # pred starts with gt (e.g. pred="Italy in 2020" gt="Italy")
+        if pred_norm.startswith(gt_norm):
+            return True
+
+    return False
 
 
-def compute_score(data_source=None, completion=None, reference=None, extra_info=None,
-                  solution_str=None, ground_truth=None, metric="relaxed",
-                  tolerance=0.05, require_format=True):
-    """Binary format/answer reward; also accepts the standard verl keyword names."""
-    completion = completion if completion is not None else solution_str
-    reference = reference if reference is not None else ground_truth
-    if completion is None or reference is None:
-        raise ValueError("Reward requires a completion and reference answer")
-    format_ok = bool(re.fullmatch(
-        r"\s*<think>[\s\S]*?</think>\s*<answer>[\s\S]*?</answer>\s*", completion))
-    correct = check_correct(reference, extract_answer(completion), metric, tolerance)
-    return 1.0 if (format_ok or not require_format) and correct else -1.0
+def compute_score(data_source, completion, reference, extra_info=None):
+    """
+    Binary reward (ReVPT style):
+      +1.0 if format correct AND answer correct
+      -1.0 otherwise
+    """
+    format_ok, _ = check_format(completion)
+    pred = extract_answer(completion)
+    answer_ok = check_correct(reference, pred)
+
+    if format_ok and answer_ok:
+        return 1.0
+    return -1.0
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -166,7 +200,6 @@ class VICORewardManager(AbstractRewardManager):
         self.tokenizer = tokenizer
         self.num_examine = num_examine
         self.reward_fn_key = reward_fn_key
-        self.compute_score = compute_score or globals()["compute_score"]
 
     def __call__(
         self,
@@ -197,14 +230,12 @@ class VICORewardManager(AbstractRewardManager):
 
         already_printed = 0
         for i in range(len(data)):
-            score = self.compute_score(
-                data_source=data[i].non_tensor_batch.get(self.reward_fn_key),
+            score = compute_score(
+                data_source=None,
                 completion=sequences_str[i],
                 reference=ground_truths[i],
             )
-            response_length = int(valid_response_length[i].item())
-            if response_length > 0:
-                reward_tensor[i, response_length - 1] = score
+            reward_tensor[i, valid_response_length[i].item() - 1] = score
 
             if already_printed < self.num_examine:
                 already_printed += 1
@@ -224,3 +255,71 @@ class VICORewardManager(AbstractRewardManager):
             return {"reward_tensor": reward_tensor}
         else:
             return reward_tensor
+
+
+if __name__ == "__main__":
+    tests = [
+        # ── Numeric: same as SCENE ──
+        ("<think>Reading the chart.</think><answer>6.68</answer>",
+         "6.68", 1.0, "exact numeric match"),
+        ("<think>Reading the chart.</think><answer>6.7</answer>",
+         "6.68", 1.0, "numeric within 5% tolerance"),
+        ("<think>Reading the chart.</think><answer>45</answer>",
+         "45", 1.0, "integer match"),
+        ("<think>Reading.</think><answer>2020</answer>",
+         "2020.0", 1.0, "int vs float match"),
+        ("<think>Reading.</think><answer>100,000</answer>",
+         "100000", 1.0, "comma-formatted number"),
+        ("<think>Reading.</think><answer>312,015</answer>",
+         "312015", 1.0, "comma-formatted number 2"),
+        ("<think>Wrong.</think><answer>50</answer>",
+         "6.68", -1.0, "wrong numeric answer"),
+
+        # ── Text: normalized matching ──
+        ("<think>Looking at the chart.</think><answer>Italy</answer>",
+         "Italy", 1.0, "exact text match"),
+        ("<think>Looking.</think><answer>italy</answer>",
+         "Italy", 1.0, "case insensitive"),
+        ("<think>Looking.</think><answer>Italy.</answer>",
+         "Italy", 1.0, "trailing period stripped"),
+        ("<think>Looking.</think><answer>Bausch & Lomb</answer>",
+         "Bausch & Lomb", 1.0, "ampersand exact"),
+        ("<think>Looking.</think><answer>Bausch and Lomb</answer>",
+         "Bausch & Lomb", 1.0, "& vs and normalized"),
+        ("<think>Looking.</think><answer>AT&T</answer>",
+         "AT&T", 1.0, "AT&T exact"),
+        ("<think>Looking.</think><answer>AT and T</answer>",
+         "AT&T", 1.0, "AT&T vs AT and T"),
+        ("<think>Looking.</think><answer>March 2021</answer>",
+         "March 2021", 1.0, "multi-word text"),
+        ("<think>Looking.</think><answer>march  2021</answer>",
+         "March 2021", 1.0, "extra spaces collapsed"),
+        ("<think>Looking.</think><answer>The Italy</answer>",
+         "Italy", 1.0, "article stripped"),
+        ("<think>Looking.</think><answer>Italy in 2020</answer>",
+         "Italy", 1.0, "pred starts with short GT"),
+        ("<think>Looking.</think><answer>Germany</answer>",
+         "Italy", -1.0, "wrong text answer"),
+
+        # ── Format: must have both tags ──
+        ("The answer is Italy", "Italy", -1.0, "no format tags"),
+        ("<answer>Italy</answer>", "Italy", -1.0, "no think tag"),
+        ("<think>OK</think>Italy", "Italy", -1.0, "no answer tag"),
+        ("", "Italy", -1.0, "empty response"),
+    ]
+
+    print("VICO Reward Tests (binary: +1 / -1)")
+    print("=" * 70)
+    all_pass = True
+    for resp, gt, expected, desc in tests:
+        score = compute_score(None, resp, gt)
+        fmt_ok, _ = check_format(resp)
+        pred = extract_answer(resp)
+        correct = check_correct(gt, pred)
+        status = "PASS" if abs(score - expected) < 0.01 else "FAIL"
+        if status == "FAIL":
+            all_pass = False
+        print(f"  {status}: score={score:+.1f} (exp={expected:+.1f}) | "
+              f"correct={correct}, format={fmt_ok}, pred='{pred[:40]}' | {desc}")
+
+    print(f"\n  {'All tests passed!' if all_pass else 'SOME TESTS FAILED!'}")

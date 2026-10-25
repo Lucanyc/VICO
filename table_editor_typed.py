@@ -17,7 +17,7 @@ Key v3 change (vs. v2 deterministic-only):
       also randomize label suffixes.
 
 Interface:
-  gen = TypedTableEditor()
+  gen = TableEditorR5()
   result = gen.generate_deterministic(
       csv_path=..., question=..., original_answer=...,
       answer_cell={"row": r, "col": c}, tier=1,
@@ -335,7 +335,7 @@ EDITORS = {
 # Scene generator subclass
 # =============================================================================
 
-class TypedTableEditor(TableEditor):
+class TableEditorR5(TableEditor):
     """render_chart adds y_axis_min; generate_deterministic accepts edit_seed."""
 
     def render_chart(self, df, output_path, question="", seed=None, y_axis_min=None):
@@ -538,6 +538,6 @@ class TypedTableEditor(TableEditor):
 
 
 if __name__ == "__main__":
-    gen = TypedTableEditor()
+    gen = TableEditorR5()
     print("Round-5 generator ready (v3 with seed-driven variants).")
     print("Available editors:", list(EDITORS.keys()))

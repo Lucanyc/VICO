@@ -1,167 +1,157 @@
 # VICO
 
-**Visual Environments Co-Evolving for Vision-Language Model Reasoning**
-
 [Paper](https://arxiv.org/abs/2610.10782)
 
-VICO couples a visual editing Planner, an executable environment editor, and a
-Solver. The Solver's pass rate guides subsequent edits; the resulting trajectories
-support Rewriter reward-weighted training and Solver GRPO.
+This release organizes the original table-environment research code for visual
+co-evolution. It includes the Solver and Rewriter training paths, their data
+builders, evaluation scripts, and the existing InternVL and tool-training
+branches. Dataset-specific file names have been generalized.
 
-The main interfaces are independent of dataset names. Data fields, prompts,
-answer metrics, model paths, and editor factories are configurable. This release
-includes a **CSV-backed table/figure editor**. Other visual environments need an
-editor that returns an image and its valid answer; a generic interface alone does
-not implement scene-graph or protected-region editing.
+The research implementations are retained. There is no replacement feedback
+loop, reward policy, or data-selection algorithm. Publication changes are listed
+in [docs/SOURCE.md](docs/SOURCE.md); file hashes are in `SOURCE_PROVENANCE.json`.
 
-## Layout
+## Code map
 
-| Component | Code |
+| Stage | Source-derived entry point |
 | --- | --- |
-| Co-evolution entry point | `run_evolution.py` |
-| Dataset-independent feedback loop | `vico/pipeline.py` |
-| JSON/JSONL schema adapter | `vico/data.py` |
-| Editor adapter and custom factories | `vico/backends.py` |
-| CSV editing, label extraction, rendering | `table_editor.py` |
-| Local Planner / API table Planner | `local_planner.py`, `api_planner.py` |
-| Solver inference and configurable scoring | `vico/solver.py`, `vico/metrics.py` |
-| Rewriter data and RWR training | `build_rewriter_data.py`, `train_rewriter.sh` |
-| Solver data and GRPO training | `tools/prepare_rewritten_training.py`, `train_solver.sh` |
-| Training reward and framework | `reward.py`, `vendor/verl/` |
-| Evaluation | `evaluate.py` |
+| Generate editing trajectories | `run_evolution.py` |
+| Table edits and rendering | `table_editor.py` |
+| Trained / API Rewriter | `local_planner.py`, `api_planner.py` |
+| Rewriter reward-weighted data | `build_rewriter_data.py` |
+| Rewriter LoRA SFT | `train_rewriter.sh` |
+| Solver SFT generation | `generate_solver_sft_api.py`, `generate_solver_sft_local.py` |
+| Solver SFT data and training | `build_solver_sft_data.py`, `train_solver_sft.sh` |
+| Solver GRPO data and training | `build_solver_data.py`, `train_solver.sh` |
+| Original Solver reward | `reward.py` |
+| InternVL JSONL data | `build_solver_data_internvl.py` |
+| InternVL GRPO | `vendor/VLM-R1/run_scripts/train_solver_internvl.sh`, `train_solver_internvl_14b.sh` |
+| Tool training | `build_solver_tool_data.py`, `train_solver_tool.sh`, `tool_router.py` |
+| Evaluation | `evaluate.py`, `evaluate_answer_tag.py`, `evaluate_rethink.py`, benchmark-specific scripts |
 
-`table_loop*.py`, `table_editor_typed.py`, and `api_planner_calibrated.py` retain
-earlier table-specific variants for research comparison. `build_seed_batch.py`
-prepares table seeds. Scripts ending in `_legacy.py` preserve older data/evaluation
-paths; use the main entry points above for new runs. In particular, the legacy
-Solver builder mixes seed data and creates overlapping train/validation data.
+The continuous, calibrated, and typed loop variants retain their original
+implementations. The shared local Rewriter implementation is included because
+the table loop imports it.
 
-## Setup
+## Environment
 
-Use Python 3.10+. CPU data processing and rendering:
+Use the original compatible environments: Linux/CUDA with Python 3.10+, vLLM/verl
+for Qwen training, a separate LLaMA-Factory environment for SFT, and VLM-R1 for
+InternVL. `environment-reference.json` records an observed environment, not a
+dependency lockfile. CPU rendering dependencies are in `requirements-data.txt`.
+The Qwen GRPO launcher places `vendor/verl` on `PYTHONPATH`.
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements-data.txt
-python -m unittest discover -s tests -v
-python -m unittest discover -s tools -p 'test_*.py' -v
-```
+Set model, data, and output paths explicitly. Machine-specific examples in source
+files use `/path/to` placeholders. API configuration uses `OPENAI_API_KEY`,
+`OPENAI_BASE_URL`, and `AMPLIFIER_MODEL`; supply credentials outside the repository.
 
-Inference requires Linux, CUDA, a compatible local VLM checkpoint, and vLLM.
-The runtime checks use torch 2.8.0, vLLM 0.11.0, and transformers 4.57.3.
-`environment-reference.json` records the observed training environment; it is a
-reference, not a resolved lockfile. The vendored framework metadata has older
-NumPy constraints than that environment, so do not blindly resolve its dependencies
-over an existing working installation. The training launcher puts the vendored
-framework on `PYTHONPATH`.
+The original SFT launchers register datasets inside `LLAMA_FACTORY_DIR` and may
+rewrite their input JSON when removing unreadable images. Run them with an
+independent LLaMA-Factory working directory and copied inputs when preserving
+existing files. Their behavior has not been silently changed.
 
-Rewriter training uses an external LLaMA-Factory checkout. Configure paths and
-credentials locally using `.env.example`; scripts do not automatically load it.
+## Generation and Rewriter training
 
-## Dataset interface
-
-Supply a JSON array or JSONL with one record per question:
-
-```json
-{"id":"example-1","image":"images/example.png","question":"What value is shown?","answer":"20"}
-```
-
-Image paths are relative to `--image-root`. The adapter also accepts `image_path`,
-`imgname`, `query`, and `label`. For other schemas, pass `--field-map mapping.json`:
-
-```json
-{"id":"uid","image":"picture","question":"prompt","answer":"target"}
-```
-
-For the included editor, also provide `table` (CSV path relative to the dataset
-file) and `tier`. Tier 2 changes rendering while keeping values and labels fixed.
-Tier 1 edits data and requires `answer_cell`, e.g. `{"row":1,"col":"Value"}`;
-its answer is recomputed from that cell's entity. Generated CSVs are saved beside
-images and used in the next edit, so the image, table, and answer share one state.
-The table backend assumes questions refer to values/entities, rather than visual
-features that style changes could invalidate.
-
-Datasets and model weights are supplied separately. The prepared rewritten-only
-archive contains 41,495 unique QA records and 41,481 unique images; 36,088 records
-belong to the main co-evolution subset. The archive contains no original seed
-images. It is not stored in Git. See `docs/DATA.md` for the schema and split policy.
-
-## Run a small evaluation
+Use two allocated GPUs for the original loop's separate Rewriter and Solver.
+Each worker receives its own `--start`, `--n`, output directory, and JSON file.
+The original JSON schema and `tier` / `answer_cell` metadata are required.
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python evaluate.py \
-  --model /path/to/model \
-  --data /path/to/samples.jsonl --image-root /path/to/dataset \
-  --prompt-style boxed --metric relaxed --tolerance 0.05 \
-  --n 2 --batch-size 1 --max-tokens 256 --max-model-len 4096 \
-  --temperature 0 --tp 1 --enforce-eager \
-  --output outputs/smoke/evaluation.json
-```
-
-Prompt styles: `boxed`, `answer_tag`, or `direct`. Use `--metric exact` for
-case-insensitive exact text matching, or `relaxed` for a configurable relative
-numeric tolerance. Neither is a universal answer verifier. Custom instructions
-can be supplied with `--system-prompt-file`; keep their output format consistent
-with `--prompt-style`. `--resume` checks configuration before reusing results.
-
-## Generate and train
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python run_evolution.py \
-  --data /path/to/seeds.jsonl --image-root /path/to/seeds \
-  --model /path/to/solver --editor table --planner simple \
-  --n 2 --n-rollouts 4 --max-turns 2 \
-  --output-dir outputs/round0
+CUDA_VISIBLE_DEVICES=0,1 python run_evolution.py \
+  --data_json /path/to/rewriter_seeds.json \
+  --tables_dir /path/to/tables --png_dir /path/to/png \
+  --start 0 --n 200 \
+  --model_path /path/to/previous_solver \
+  --rewriter_model_path /path/to/previous_rewriter \
+  --planner_mode local --n_rollouts 8 --max_turns 5 \
+  --output_dir outputs/round3/images_0-200 \
+  --output_json outputs/round3/trajectories_0-200.json --resume
 
 python build_rewriter_data.py \
-  --traj_files outputs/round0/trajectories.json \
-  --output_dir outputs/rewriter-data
+  --traj_files 'outputs/round3/trajectories_*.json' \
+  --png_dir /path/to/png --output_dir outputs/round3/rewriter_data \
+  --beta 4.0 --max_repeats 5
 
-REWRITER_BASE=/path/to/rewriter LLAMA_FACTORY_DIR=/path/to/LLaMA-Factory \
-TRAIN_DATA="$PWD/outputs/rewriter-data/rewriter_rwr_train_llama.json" \
-VAL_DATA="$PWD/outputs/rewriter-data/rewriter_rwr_val_llama.json" \
+ROUND=3 REWRITER_BASE=/path/to/previous_rewriter \
+TRAIN_DATA="$PWD/outputs/round3/rewriter_data/rewriter_rwr_train_llama.json" \
+VAL_DATA="$PWD/outputs/round3/rewriter_data/rewriter_rwr_val_llama.json" \
+LLAMA_FACTORY_DIR=/path/to/independent/LLaMA-Factory \
+OUTPUT_DIR="$PWD/outputs/round3/rewriter_adapter" GPUS=0,1,2,3 \
 bash train_rewriter.sh
-
-python tools/prepare_rewritten_training.py \
-  --dataset-root /path/to/rewritten-dataset --subset coevolution \
-  --output-dir outputs/solver-data
-
-MODEL_PATH=/path/to/solver NUM_GPUS=4 \
-TRAIN_FILE="$PWD/outputs/solver-data/train.parquet" \
-VAL_FILE="$PWD/outputs/solver-data/val.parquet" \
-bash train_solver.sh
 ```
 
-The RWR builder needs at least two source-image groups to create disjoint splits.
-A two-seed smoke run may produce too few usable groups; use a larger generation
-run to prepare training data. New trajectories preserve full questions and the
-exact image/answer presented to each Planner turn.
+The table Rewriter builder takes the arguments shown above. Flags such as
+`--round`, `--gpt5_traj_files`, `--prev_traj_files`, and `--k_max` belong to a
+different environment's builder and are not added here.
 
-The simple Planner uses feedback rules. `--planner api` uses the included table
-Planner and `OPENAI_API_KEY`; data-changing table edits also require this key.
-The local Planner accepts `--planner-config '{"model_path":"/path/to/rewriter"}'`.
-Local Planner and Solver share the visible device pool: set the Planner's
-`gpu_memory_utilization` in `--planner-config` and the Solver's
-`--gpu-memory-utilization` so their combined budgets fit the hardware. For example,
-two 8B models on one 80 GB GPU can start with budgets of 0.4 and 0.5 respectively;
-actual capacity depends on model, context, and image sizes.
+## Solver SFT
 
-For another environment, pass `--editor your_module:factory` and, if needed,
-`--planner your_module:factory`; JSON keyword arguments go in `--editor-config`
-and `--planner-config`. See `docs/EXTENDING.md`. Training accepts `REWARD_PATH`,
-`REWARD_FUNCTION`, and `REWARD_MANAGER` to select another verifier. Extra arguments
-to `train_solver.sh` are forwarded as Hydra overrides.
+```bash
+python generate_solver_sft_api.py \
+  --data_json /path/to/train.json --png_dir /path/to/png \
+  --start 0 --n 500 --model your-provider-model \
+  --output_dir outputs/solver_sft_raw --min_think_words 200 --resume
 
-## Validation and provenance
+python build_solver_sft_data.py \
+  --raw_files 'outputs/solver_sft_raw/solver_sft_raw_*.json' \
+  --output_dir outputs/solver_sft --min_think_words 200
 
-`docs/VALIDATION.md` records the actual smoke-test scope. CPU tests exercise real
-rendering, schema handling, cumulative edits, RWR conversion, and grouped splits.
-`python tools/smoke_training.py` verifies vendored verl reward loading and tensor
-placement in an environment with training dependencies.
+BASE_MODEL=/path/to/base_model SFT_DATA_DIR="$PWD/outputs/solver_sft" \
+LLAMA_FACTORY_DIR=/path/to/independent/LLaMA-Factory \
+OUTPUT_DIR="$PWD/outputs/solver_sft_adapter" GPUS=0,1,2,3,4,5,6,7 \
+bash train_solver_sft.sh
+```
 
-This is a refactored research-code release, not a frozen reproduction of every
-paper experiment. `docs/CHANGES.md` identifies publication changes;
-`SOURCE_PROVENANCE.json` records source hashes without private workspace paths.
-Third-party notices and licenses are retained in `vendor/verl/`. No new license
-is assigned to project-specific code or separately distributed derivative data.
+## Solver GRPO and checkpoint merge
+
+The original builder retains all valid edited turns regardless of historical
+pass rate. It also supports mixing original records and already-calibrated seed
+images. Those original images are excluded from the separately packaged release;
+see [docs/DATA.md](docs/DATA.md) for using that release with the original builder.
+
+```bash
+python build_solver_data.py \
+  --traj_files 'outputs/round1/trajectories_*.json' 'outputs/round2/trajectories_*.json' \
+  --original_data /path/to/train.json --png_dir /path/to/png \
+  --n_original 2000 --output outputs/round2/solver_grpo.parquet
+
+ROUND=2 TRAIN_FILE="$PWD/outputs/round2/solver_grpo.parquet" \
+MODEL_PATH=/path/to/previous_solver CKPTS_DIR="$PWD/outputs/round2/solver_ckpt" \
+NUM_GPUS=8 TRAIN_BATCH_SIZE=32 TOTAL_EPOCHS=3 ROLLOUT_TEMPERATURE=0.7 \
+bash train_solver.sh
+
+PYTHONPATH="$PWD/vendor/verl" python -m verl.model_merger merge \
+  --backend fsdp --local_dir outputs/round2/solver_ckpt/global_step_380/actor \
+  --target_dir outputs/round2/solver_merged
+```
+
+The first round uses the base model; later rounds pass the preceding selected
+checkpoint explicitly. The supplied fourth-round recipe uses
+`MAX_PROMPT_LENGTH=1648 MAX_RESPONSE_LENGTH=5824 MAX_MODEL_LEN=8896`.
+The bounded gradient check and its results are documented in
+[docs/VALIDATION.md](docs/VALIDATION.md).
+
+For InternVL, set `TRAIN_FILE` to the JSONL produced by
+`build_solver_data_internvl.py`, set `MODEL_PATH`, and run the corresponding
+VLM-R1 launcher in the original compatible environment. These scripts use their
+own `accuracy` and `format` rewards; they do not use the Qwen binary reward.
+Tool training additionally requires the original tool environments, weights,
+services, and `TOOL_ROUTER_URL`. Its launcher performs node-local Ray cleanup;
+use it only on a node allocated to that run.
+
+## Evaluation
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1,2,3 python evaluate_answer_tag.py \
+  --model_path /path/to/solver --data_json /path/to/test.json \
+  --image_root /path/to/images --tp 4 --output outputs/evaluation.json
+```
+
+Benchmark-specific evaluation scripts keep their original flags and answer
+checkers. `mathvision_inference.py` uses `--model` and `--test_file`, whereas
+`eval_mathvista.py` uses `--model_path` and `--data_json`. Model merging requires
+the complete `.../actor` path on the same command line.
+
+No datasets, model weights, credentials, or raw experiment logs are committed.
+The rewritten archive contains 41,495 QA records and 41,481 images, with zero
+original seed images. Third-party licenses remain with their source packages.

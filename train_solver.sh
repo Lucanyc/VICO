@@ -1,20 +1,21 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Solver GRPO Training for VICO
+# Solver GRPO Training for SCENE-Math
 #
-# Uses verl GRPO to train the solver on difficulty-calibrated VICO images.
+# Uses verl GRPO to train the solver on difficulty-calibrated SCENE images.
 # Optimized for 3× A100-80GB setup.
 #
 # Usage:
-#   bash train_solver.sh
+#   bash run_solver_grpo_scene.sh
 #
 #   # Custom paths:
 #   ROUND=0 \
 #   TRAIN_FILE=/path/to/solver_grpo_train.parquet \
 #   MODEL_PATH=/path/to/Qwen3-VL-8B-Instruct \
-#   bash train_solver.sh
+#   bash run_solver_grpo_scene.sh
 # =============================================================================
 set -euo pipefail
+export PYTHONPATH="${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}/vendor/verl${PYTHONPATH:+:${PYTHONPATH}}"
 
 # =============================================================================
 # Networking — force torch.distributed to use localhost
@@ -33,7 +34,6 @@ unset ROCR_VISIBLE_DEVICES 2>/dev/null || true
 # =============================================================================
 ROUND=${ROUND:-0}
 VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
-export PYTHONPATH="${VICO_DIR}/vendor/verl:${VICO_DIR}${PYTHONPATH:+:${PYTHONPATH}}"
 
 # Data
 TRAIN_FILE=${TRAIN_FILE:-${VICO_DIR}/round_${ROUND}/solver_grpo_train.parquet}
@@ -43,14 +43,12 @@ if [ ${ROUND} -gt 0 ]; then
     PREV_ROUND=$((ROUND - 1))
     DEFAULT_MODEL=$(ls -d ${VICO_DIR}/round_${PREV_ROUND}/solver_merged_step* 2>/dev/null | sort -t'p' -k2 -n | tail -1 || true)
     if [ -z "${DEFAULT_MODEL}" ]; then
-        DEFAULT_MODEL="${BASE_MODEL:-}"
+        DEFAULT_MODEL="/path/to/models/Qwen3-VL-8B-Instruct"
     fi
 else
-    DEFAULT_MODEL="${BASE_MODEL:-}"
+    DEFAULT_MODEL="/path/to/models/Qwen3-VL-8B-Instruct"
 fi
 MODEL_PATH=${MODEL_PATH:-${DEFAULT_MODEL}}
-: "${MODEL_PATH:?Set MODEL_PATH or BASE_MODEL to your local Solver checkpoint}"
-VAL_FILE=${VAL_FILE:-${TRAIN_FILE/.parquet/_val.parquet}}
 
 # Checkpoints
 CKPTS_DIR=${CKPTS_DIR:-${VICO_DIR}/round_${ROUND}/solver_ckpt}
@@ -77,7 +75,7 @@ exp_name="vico-solver-round${ROUND}-grpo"
 mkdir -p "${CKPTS_DIR}"
 
 echo "============================================================"
-echo "VICO Solver GRPO Training — Round ${ROUND}"
+echo "SCENE Solver GRPO Training — Round ${ROUND}"
 echo "  Train data:   ${TRAIN_FILE}"
 echo "  Model:        ${MODEL_PATH}"
 echo "  Checkpoints:  ${CKPTS_DIR}"
@@ -96,14 +94,13 @@ if [ ! -f "${TRAIN_FILE}" ]; then
     exit 1
 fi
 
-# Inspect Parquet metadata without materializing the full training dataset.
-python3 - "${TRAIN_FILE}" <<'PYDATA'
-import sys
-import pyarrow.parquet as pq
-parquet = pq.ParquetFile(sys.argv[1])
-print(f"  Data: {parquet.metadata.num_rows} samples")
-print(f"  Columns: {parquet.schema_arrow.names}")
-PYDATA
+# Print data stats
+python3 -c "
+import pandas as pd
+df = pd.read_parquet('${TRAIN_FILE}')
+print(f'  Data: {len(df)} samples')
+print(f'  Columns: {list(df.columns)}')
+"
 
 # =============================================================================
 # Run GRPO Training
@@ -113,7 +110,7 @@ python3 -m verl.trainer.main_ppo \
     algorithm.use_kl_in_reward=False \
     \
     data.train_files="${TRAIN_FILE}" \
-    data.val_files="${VAL_FILE}" \
+    data.val_files="${TRAIN_FILE/.parquet/_val.parquet}" \
     data.train_batch_size=${TRAIN_BATCH_SIZE} \
     data.max_prompt_length=${MAX_PROMPT_LENGTH:-1048} \
     data.max_response_length=${MAX_RESPONSE_LENGTH:-3824} \
@@ -164,9 +161,9 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.calculate_log_probs=True \
     +actor_rollout_ref.rollout.engine_kwargs.vllm.disable_mm_preprocessor_cache=True \
     \
-    custom_reward_function.path="${REWARD_PATH:-${VICO_DIR}/reward.py}" \
-    custom_reward_function.name=${REWARD_FUNCTION:-compute_score} \
-    reward_model.reward_manager=${REWARD_MANAGER:-vico_reward} \
+    custom_reward_function.path="${VICO_DIR}/reward.py" \
+    custom_reward_function.name=compute_score \
+    reward_model.reward_manager=vico_reward \
     \
     trainer.total_epochs=${TOTAL_EPOCHS} \
     trainer.save_freq=10 \
@@ -174,7 +171,7 @@ python3 -m verl.trainer.main_ppo \
     trainer.critic_warmup=0 \
     trainer.resume_mode=auto \
     trainer.val_before_train=True \
-    "trainer.logger=${TRAINER_LOGGER:-[console]}" \
+    "trainer.logger=[console,wandb]" \
     trainer.project_name="${project_name}" \
     trainer.experiment_name="${exp_name}" \
     trainer.default_local_dir=${CKPTS_DIR} \
@@ -182,6 +179,6 @@ python3 -m verl.trainer.main_ppo \
     trainer.nnodes=1 "$@"
 
 echo "============================================================"
-echo "VICO Solver GRPO Training Complete — Round ${ROUND}"
+echo "SCENE Solver GRPO Training Complete — Round ${ROUND}"
 echo "  Checkpoint: ${CKPTS_DIR}"
 echo "============================================================"

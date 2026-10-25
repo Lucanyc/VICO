@@ -19,13 +19,13 @@ Output schema per sample:
 
 Usage:
     python3 build_seed_batch.py \
-        --train_augmented /path/to/vico/train/train_augmented.json \
-        --tables_dir      /path/to/vico/train/tables \
-        --png_dir         /path/to/vico/train/png \
+        --train_augmented /path/to/dataset/vico/train/train_augmented.json \
+        --tables_dir      /path/to/dataset/vico/train/tables \
+        --png_dir         /path/to/dataset/vico/train/png \
         --used_glob       "vico_genenv_round2/newprompt_trajectories_*.json" \
         --used_glob       "vico_genenv_round3/newprompt_trajectories_*.json" \
         --n_target        2500 \
-        --output          /path/to/vico/train/vico_rewriter_round4_2500.json
+        --output          /path/to/dataset/vico/train/vico_rewriter_round4_2500.json
 """
 
 import argparse
