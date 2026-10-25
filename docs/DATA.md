@@ -23,7 +23,7 @@ metadata field names and call the source function:
 ```python
 import json, random
 from pathlib import Path
-from build_solver_grpo_data_chartqa import samples_to_parquet
+from build_solver_data import samples_to_parquet
 
 root = Path('/path/to/rewritten-dataset').resolve()
 samples = []
@@ -49,4 +49,4 @@ images. Using the packaged metadata above avoids those seed images.
 Rewriter training requires trajectories and the images shown to the Planner,
 including seed images for first turns. A rewritten-image archive alone cannot
 reconstruct all Rewriter training inputs; supply the original training images
-separately when running `build_rewriter_rwr_chartqa_data.py`.
+separately when running `build_rewriter_data.py`.
