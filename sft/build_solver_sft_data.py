@@ -8,7 +8,7 @@ correct + long-enough reasoning, and outputs LlamaFactory-compatible format.
 Response format: <think>...</think>\n<answer>X</answer>
 
 Usage:
-    python3 build_solver_sft_data.py \
+    python3 sft/build_solver_sft_data.py \
         --raw_files vico_solver_sft_235b/solver_sft_raw_*.json \
         --output_dir vico_solver_sft_235b \
         --min_think_words 200

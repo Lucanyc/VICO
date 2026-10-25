@@ -10,15 +10,15 @@
 #   Step 5: LlamaFactory LoRA SFT training
 #
 # Usage:
-#   GPUS="0,1,2,3,4,5,6,7" bash train_solver_sft.sh
-#   GPUS="0,1,2,3,4,5,6,7" NUM_EPOCHS=10 bash train_solver_sft.sh
+#   GPUS="0,1,2,3,4,5,6,7" bash sft/train_solver_sft.sh
+#   GPUS="0,1,2,3,4,5,6,7" NUM_EPOCHS=10 bash sft/train_solver_sft.sh
 # =============================================================================
 set -euo pipefail
 
 # =============================================================================
 # Configuration
 # =============================================================================
-VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
+VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 LLAMA_FACTORY_DIR=${LLAMA_FACTORY_DIR:-/path/to/LLaMA-Factory}
 GPUS=${GPUS:-"0,1,2,3,4,5,6,7"}
 

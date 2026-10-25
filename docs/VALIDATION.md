@@ -68,7 +68,17 @@ The selected implementations retain the original scoring, sample selection,
 rendering, and optimization rules. Public names and labels were neutralized.
 The renamed reward retains the original 23 embedded cases, and its custom reward
 manager is loaded through the active installed verl rather than a copied engine.
-Source hashes in `SOURCE_PROVENANCE.json` cover only the selected files.
+Source hashes in `docs/SOURCE_PROVENANCE.json` cover only the selected files.
+
+After organizing the scripts into `vico/`, `sft/`, and `rl/`, checks in an
+isolated directory of the original server environment passed for six CLI entry
+points, module imports, image rendering, and the installed verl reward loader.
+Rebuilding the saved reference trajectories produced 17 Solver rows and 37/2
+Rewriter training/validation rows. All three training launchers resolved paths
+and forwarded overrides from a different working directory; their GPU training
+commands were intercepted for this path check. No new optimizer steps were run
+for the directory reorganization. All ten Python implementations retain the
+same executable syntax trees as the preceding compact release.
 
 Generation uses a separate numeric checker with 0.5% tolerance and scale
 comparisons. It is intentionally not replaced by the training reward's 5% rule.

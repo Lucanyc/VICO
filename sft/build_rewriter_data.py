@@ -8,7 +8,7 @@ Same logic as build_rewriter_rwr_genenv_data.py (scene), adapted for vico:
   - RWR weight: exp(-β(p̂ - 0.5)²)
 
 Usage:
-    python3 build_rewriter_data.py \
+    python3 sft/build_rewriter_data.py \
         --traj_files vico_genenv_test/trajectories_*.json \
         --png_dir /path/to/dataset/vico/train/png \
         --output_dir vico_rewriter_rwr \

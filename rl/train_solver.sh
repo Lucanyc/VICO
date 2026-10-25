@@ -6,13 +6,13 @@
 # Optimized for 3× A100-80GB setup.
 #
 # Usage:
-#   bash train_solver.sh
+#   bash rl/train_solver.sh
 #
 #   # Custom paths:
 #   ROUND=0 \
 #   TRAIN_FILE=/path/to/solver_grpo_train.parquet \
 #   MODEL_PATH=/path/to/Qwen3-VL-8B-Instruct \
-#   bash train_solver.sh
+#   bash rl/train_solver.sh
 # =============================================================================
 set -euo pipefail
 
@@ -32,7 +32,7 @@ unset ROCR_VISIBLE_DEVICES 2>/dev/null || true
 # Configuration
 # =============================================================================
 ROUND=${ROUND:-0}
-VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
+VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 
 # Data
 TRAIN_FILE=${TRAIN_FILE:-${VICO_DIR}/round_${ROUND}/solver_grpo_train.parquet}
@@ -160,7 +160,7 @@ python3 -m verl.trainer.main_ppo \
     actor_rollout_ref.rollout.calculate_log_probs=True \
     +actor_rollout_ref.rollout.engine_kwargs.vllm.disable_mm_preprocessor_cache=True \
     \
-    custom_reward_function.path="${VICO_DIR}/reward.py" \
+    custom_reward_function.path="${VICO_DIR}/rl/reward.py" \
     custom_reward_function.name=compute_score \
     reward_model.reward_manager=vico_reward \
     \

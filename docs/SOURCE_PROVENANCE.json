@@ -1,0 +1,129 @@
+{
+  "note": "Selected original research implementations only. Reward scoring, data selection, rendering and training algorithms retained. Supporting training engines are external dependencies.",
+  "files": [
+    {
+      "file": "vico/run_evolution.py",
+      "source_sha256": "49289d66b3cfc53ddc85aa9af2ee1798738cd99f10d51a927b1fe519972e6d6c",
+      "published_sha256": "165a38928b58e7e65c2f6b5e34f7c68ded58f400eb989e70f60487130c972991",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "vico/table_editor.py",
+      "source_sha256": "7e172813ba0b64dd8a45128d244ca0d6064f2cdde985b9ac00216663123b513a",
+      "published_sha256": "266c9088889b0af3d0c6a57bf33b2e40eeb94422e0c2cd9f1e205ac1080d88fe",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "vico/api_planner.py",
+      "source_sha256": "34ce06de090b343f294cbbf94f666589c92fa77664b4229b47e0c7f7d7d8e80c",
+      "published_sha256": "330adb6c18d98eb58c2c41a95535246f6c580d20af5efb9c3f1fb9d3b1b62b19",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "vico/local_planner.py",
+      "source_sha256": "d4d20293d221840286e10c9d7bbbd12e70bc8cb087358a25140a781755efd145",
+      "published_sha256": "d723bdbdf4b2647cf8315e4f2229049949ef7759d4b536d5f345fae17e9c4587",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "sft/build_rewriter_data.py",
+      "source_sha256": "747303b4b68ac74991a6b8b6b2ebf50495c61569eeeb78653b86cdbf332199fb",
+      "published_sha256": "ea9890784e0cd616a764c3b9037d71fa715fc403ca4bb293ccd973f706c67a11",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "sft/train_rewriter.sh",
+      "source_sha256": "a3a0aac00726dc7ebcdf63f958eead65a7253b5f67b98d1ad1e95e3d79d2a654",
+      "published_sha256": "d849d204b3fedfeb796b0be6f395eb6837544970633a7a504cc9980699bdbd90",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "retain CLI override forwarding and disabled shell tracing from the tested release",
+        "group by generation/evaluation, SFT and RL; update usage paths",
+        "resolve repository root from the training subdirectory"
+      ]
+    },
+    {
+      "file": "rl/build_solver_data.py",
+      "source_sha256": "c8b523c74fa9c25db66c07ad2d07b8714b7faa446e729f6a9e4c8c8c4a2ed8c8",
+      "published_sha256": "fb68c134fb3cdcb3c3254068802410a4602db947c71e98217f4586c26aa8d032",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "rl/train_solver.sh",
+      "source_sha256": "2207cb0bb9fc3ad9493392566a24088a9de6d97a78533749232c8493eff07fb5",
+      "published_sha256": "9d84b3f98caa5aee2d6a9bae9247a9d441a5c6bd52c555ff378029f70127f8f7",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "register the original reward implementation through the installed verl custom-module loader",
+        "retain CLI override forwarding and disabled shell tracing from the tested release",
+        "group by generation/evaluation, SFT and RL; update usage paths",
+        "resolve repository root from the training subdirectory"
+      ]
+    },
+    {
+      "file": "rl/reward.py",
+      "source_sha256": "a8ec266de31c900d27624660b9342e5f8dbd9a76c17c5dc26aaf3655ff1e1c73",
+      "published_sha256": "09c8b5cea4c645a7414b2f6283b0fca892a98bb2223559e2836c285309c68481",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "sft/generate_solver_sft.py",
+      "source_sha256": "5ebfb58bfc3814a1a8ff751d6f7a8d3e9bf879a0001ac92c8ea65873f1039f58",
+      "published_sha256": "ea5f2e11b1d4c2536617c8c3e4635dab010f1d4bd695ef397ae24a10c02d8192",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "sft/build_solver_sft_data.py",
+      "source_sha256": "fb7d80338de80f4998e322649b6e82041d16e060feb4ba3e4e5a3dcb2cee7c84",
+      "published_sha256": "cf5c334ddbae7f70f08161a458f35909745adfddcee020d65eff14b0b5cbb6c3",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    },
+    {
+      "file": "sft/train_solver_sft.sh",
+      "source_sha256": "3542c1444246b9aa1837d4995a108c0d26d786706c00b4c0dab5977d81382023",
+      "published_sha256": "3d1e23f7419e13fcb65ebdf554e3f89402db1b381bce759c415b0c045b9e3a97",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "retain CLI override forwarding and disabled shell tracing from the tested release",
+        "group by generation/evaluation, SFT and RL; update usage paths",
+        "resolve repository root from the training subdirectory"
+      ]
+    },
+    {
+      "file": "vico/evaluate.py",
+      "source_sha256": "ed60d466095038ebb5a4d8dd6091bb3920f1acc6e37f1a23d75efca625762641",
+      "published_sha256": "dc7825ad8b724018061e39e877b3e7adb675467c972815ce4a11f30b7d032656",
+      "changes": [
+        "neutral file/module/class and dataset labels; public path placeholders",
+        "group by generation/evaluation, SFT and RL; update usage paths"
+      ]
+    }
+  ]
+}

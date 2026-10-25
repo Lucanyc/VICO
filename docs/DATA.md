@@ -18,12 +18,12 @@ The metadata is `samples.jsonl`, with `id`, `image`, `question`, `answer`, and
 by the source-code reorganization and is not stored in Git.
 
 To use every packaged record with the original Parquet writer, adapt only the
-metadata field names and call the source function:
+metadata field names and call the source function from the repository root:
 
 ```python
 import json, random
 from pathlib import Path
-from build_solver_data import samples_to_parquet
+from rl.build_solver_data import samples_to_parquet
 
 root = Path('/path/to/rewritten-dataset').resolve()
 samples = []
@@ -49,4 +49,4 @@ images. Using the packaged metadata above avoids those seed images.
 Rewriter training requires trajectories and the images shown to the Planner,
 including seed images for first turns. A rewritten-image archive alone cannot
 reconstruct all Rewriter training inputs; supply the original training images
-separately when running `build_rewriter_data.py`.
+separately when running `sft/build_rewriter_data.py`.

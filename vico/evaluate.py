@@ -3,7 +3,7 @@
 Evaluate Qwen3-VL on vico test set.
 
 Usage:
-    CUDA_VISIBLE_DEVICES=0 python3 evaluate.py \
+    CUDA_VISIBLE_DEVICES=0 python3 vico/evaluate.py \
         --model_path /path/to/models/Qwen3-VL-8B-Instruct \
         --data_json /path/to/dataset/vico/converted_test/vico_vlmgym_format.json \
         --image_root /path/to/dataset/vico \

@@ -8,7 +8,7 @@ Same approach as build_solver_grpo_data_genenv.py (scene), adapted for vico:
   - System prompt for chart QA
 
 Usage:
-    python3 build_solver_data.py \
+    python3 rl/build_solver_data.py \
         --traj_files vico_genenv_gpt5/trajectories_*.json \
         --original_data /path/to/vico/train/train_augmented.json \
         --png_dir /path/to/vico/train/png \

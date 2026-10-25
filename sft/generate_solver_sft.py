@@ -9,7 +9,7 @@ Usage:
     export OPENAI_API_KEY="sk-..."
     export OPENAI_BASE_URL="https://your-provider.example/v1"
 
-    python3 generate_solver_sft.py \
+    python3 sft/generate_solver_sft.py \
         --data_json /path/to/dataset/vico/train/train_augmented.json \
         --png_dir /path/to/dataset/vico/train/png \
         --start 8300 --n 200 \

@@ -10,12 +10,12 @@
 #   # Round 0 (from base model, using GPT-5 trajectory data):
 #   ROUND=0 \
 #   GPUS=0,1,2,3 \
-#   bash train_rewriter.sh
+#   bash sft/train_rewriter.sh
 #
 #   # Round 1 (from Round 0 merged rewriter):
 #   ROUND=1 \
 #   GPUS=0,1,2,3 \
-#   bash train_rewriter.sh
+#   bash sft/train_rewriter.sh
 #
 #   # Custom paths:
 #   ROUND=0 \
@@ -23,12 +23,12 @@
 #   VAL_DATA=/path/to/rewriter_rwr_val_llama.json \
 #   REWRITER_BASE=/path/to/base_model \
 #   GPUS=0,1,2,3 \
-#   bash train_rewriter.sh
+#   bash sft/train_rewriter.sh
 # =============================================================================
 set -euo pipefail
 
 ROUND=${ROUND:-0}
-VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
+VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}
 LLAMA_FACTORY_DIR=${LLAMA_FACTORY_DIR:-$(python3 -c "import llamafactory; import os; print(os.path.dirname(os.path.dirname(llamafactory.__file__)))" 2>/dev/null || echo "/path/to/LlamaFactory")}
 GPUS=${GPUS:-"0,1,2,3"}
 

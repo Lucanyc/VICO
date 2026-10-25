@@ -21,17 +21,17 @@ jobs:
         run: |
           python - <<'PY'
           import ast, pathlib, re, unicodedata
-          tree = ast.parse(pathlib.Path('reward.py').read_text())
+          tree = ast.parse(pathlib.Path('rl/reward.py').read_text())
           nodes = [n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.If))]
           scope = {'__name__': '__main__', 're': re, 'unicodedata': unicodedata}
-          exec(compile(ast.Module(body=nodes, type_ignores=[]), 'reward.py', 'exec'), scope)
+          exec(compile(ast.Module(body=nodes, type_ignores=[]), 'rl/reward.py', 'exec'), scope)
           assert scope['all_pass']
           PY
       - name: Source manifest hashes
         run: |
           python - <<'PY'
           import hashlib, json, pathlib
-          manifest = json.loads(pathlib.Path('SOURCE_PROVENANCE.json').read_text())
+          manifest = json.loads(pathlib.Path('docs/SOURCE_PROVENANCE.json').read_text())
           for entry in manifest['files']:
               path = pathlib.Path(entry['file'])
               assert hashlib.sha256(path.read_bytes()).hexdigest() == entry['published_sha256'], path
