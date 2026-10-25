@@ -13,9 +13,9 @@ Usage:
         --output eval_blink_qwen25vl_base_results.json
 
     CUDA_VISIBLE_DEVICES=0,1 python3 eval_blink.py \
-        --model_path /path/to/Vision-Zero/models/Vision-Zero-Qwen-2.5-VL-7B-scene \
+        --model_path /path/to/Vision-Zero/models/Vision-Zero-Qwen-2.5-VL-7B-Clevr \
         --tp 2 --prompt_style boxed \
-        --output eval_blink_visionzero_scene_results.json
+        --output eval_blink_visionzero_clevr_results.json
 """
 
 import os, json, re, argparse, time

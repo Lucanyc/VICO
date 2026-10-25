@@ -1,104 +1,115 @@
 # Runtime validation — 2026-10-25
 
-All runs used independent output directories. Original code, datasets, installed
-framework files, and research checkpoints were not overwritten. This document
-reports bounded execution checks, not full epochs or benchmark reproduction.
+These are bounded execution checks, not full epochs or benchmark reproduction.
+All runs used independent outputs. Original source files, datasets, installed
+framework files, and research checkpoints were not overwritten. Credentials,
+raw logs, training records, images, and model weights are not included here.
 
-## Original reward and full rewritten training pool
+## Main reference: GPT-5 generation and both training paths
 
-The original training environment loaded the original reward module, verified
-byte-for-byte against the project source. The original `samples_to_parquet`
-function converted all 41,495 packaged records without a historical pass-rate
-cutoff. Its full training table and 2,074-row sampled validation table were kept
-as produced. The training framework's 2,048-token input-length check retained
-41,491 training rows; four were over the limit.
+The original `planner_executor_loop_chartqa_genenv.py` ran with
+`--planner_mode gpt5 --planner_model openai/openai/gpt-5.4`, eight Solver rollouts
+per image, five maximum editing turns, and `--resume`. Initialization was the
+existing `chartqa_round3_solver_merged_step110` Solver. GPT-5 and the original
+editor generated changes; the original rendering code produced the images.
 
-Training started from the existing third-round 8B Solver and used 8 A100 80 GB
-GPUs, batch size 32, 9 rollouts per prompt, temperature 0.7, and the original
-binary format-and-answer reward. Four steps sampled 128 prompts and generated
-1,152 answers from the full training pool. No answer-only reward was substituted.
+Four tier-1 seeds produced 18 attempted edits and 17 valid image/QA samples.
+There were zero Planner fallbacks. One trajectory reached the target band and
+three ended as `partial`. One generated table declared six columns but supplied
+five row values; original validation rejected that edit and continued.
+This was a handled invalid edit, not a claim of 18 successful edits.
 
-| Step | +1 rewards | -1 rewards | Gradient norm |
-| --- | ---: | ---: | ---: |
-| 1 | 208 | 80 | 0.8041199 |
-| 2 | 259 | 29 | 0.4241900 |
-| 3 | 220 | 68 | 1.0488333 |
-| 4 | 272 | 16 | 0.2960535 |
+The original Solver builder retained all 17 valid edits, including examples with
+historical success rates 0 and 1. The original Rewriter builder with beta 4 and
+max repeats 5 produced 37 training and two validation rows. Generation plus
+Rewriter training completed successfully in 7m04s. Re-running generation with
+`--resume` found four completed trajectories, processed zero new samples, and
+left the trajectory file unchanged.
 
-Advantages had nonzero positive and negative values in every step. The job
-completed with exit code 0 in 18m58s and saved the step-4 model and Hugging Face
-checkpoint. One answer reached the 2,048-token output limit. No validation
-accuracy claim is made from the source builder's overlapping validation sample.
-An independent checkpoint spot check compared 1,024 values from the first
-language attention query matrix against the initialization: all 1,024 changed,
-with maximum absolute difference 7.7931e-6. This confirms an actual parameter
-update, without establishing an accuracy improvement.
+## Solver GRPO: actual rewards and updates
 
-The research launcher was copied with one addition: forwarding `"$@"` to its
-existing training command. Bounded-run overrides set four steps, save frequency,
-disabled validation, input/output limits of 2048/2048, model context 4096,
-rollout memory fraction 0.55, image patch size 16, optimizer offload, zero loader
-subprocesses, and console logging. The reward and training algorithm were not
-edited. The previous six-row check gave only +1 rewards and zero gradients;
-that small sample was insufficient to test learning on this trained Solver.
+The training pool combined all 41,495 packaged rewritten records with the 17
+new edits: 41,512 records. The 2,048-token input filter retained 41,508. No
+historical pass-rate filtering was applied. The builder's overlapping validation
+sample was not used for validation.
 
-## Original SFT paths
+`run_solver_grpo_chartqa.sh` used the original binary `chartqa_reward.py`, verified
+byte-for-byte against the installed reward module. It used eight A100 80 GB GPUs,
+batch size 32, nine rollouts per prompt, and temperature 0.7. Two optimizer steps
+sampled 64 prompts and produced 576 answers, not a complete pass over the pool.
 
-Both source launchers ran two optimizer steps with their original LoRA training
-logic. The only source-copy change was forwarding CLI overrides. Test settings
-used batch size 1, accumulation 1, SDPA, a 2,048-token cutoff, and 262,144 maximum
-image pixels; LoRA rank 64 and alpha 128 retained source defaults.
+| Step | +1 rewards | -1 rewards | Mean reward | Gradient norm |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 230 | 58 | 0.5972222 | 0.2311042 |
+| 2 | 245 | 43 | 0.7013889 | 0.3675249 |
 
-| Path | Data | Observed result |
-| --- | --- | --- |
-| Rewriter RWR/SFT | Original builder, beta 4, max repeats 5; 1,668 train / 88 validation rows from one original trajectory shard | Gradient norms 4.1675 / 4.0783; training loss 1.7148; step-2 evaluation loss 1.9397 |
-| Solver SFT | 1,070 original SFT records copied into the independent test directory | Gradient norms 0.9838 / 1.6094; training loss 0.6467 |
+The mean is `(positive_count - negative_count) / 288`, not an accuracy
+percentage. Rewards require both answer correctness and format. These two
+different batches do not establish a generalization improvement.
 
-Both saved adapters and completed successfully; the combined job exited 0 in
-3m27s. The first warm-up step had learning rate zero; the second used 5e-6.
-Dataset registration and image validation operated on independent configuration
-directories and copied/generated training JSON.
+Advantages included positive and negative values in both steps. A checkpoint
+spot check found 1,023 of 1,024 sampled attention-query values changed, with
+maximum absolute difference 3.5651e-6; all were finite. The job completed with
+exit code 0 in 15m13s and saved the step-2 Hugging Face checkpoint. Maximum
+allocated GPU memory was 56.45 GB. One answer reached the 2,048-token output cap.
 
-## Original generation and checkpoint inference
+The only runtime launcher edit was forwarding `"$@"`. Overrides bounded the run
+to two steps, disabled validation/resume, used 2048/2048 input/output limits and
+4096 model context, enabled optimizer offload, and saved the model at step 2.
+The relevant override recipe is in [RUN_COMMANDS.md](RUN_COMMANDS.md).
+The active installed verl framework was used; it differs from the optional
+vendored snapshot. See [SOURCE.md](SOURCE.md) and `environment-reference.json`.
 
-The original local-Planner loop loaded an existing trained Rewriter and the new
-step-4 Solver on two GPUs. It processed two original tier-2 seeds, with eight
-Solver answers per image and one editing turn. Both images were actually
-re-rendered. Their pass rates changed from 1.0 to 0.0, leaving both trajectories
-outside the target band (`partial`). The saved plans used the shared Planner's
-`scene_rerender` tool. No new fallback/parser logic was inserted.
+## Rewriter RWR/SFT
 
-The original evaluation entry point then loaded the saved Solver checkpoint and
-processed two packaged examples. One answer matched. This is a reload check,
-not a benchmark score. The combined job completed with exit code 0 in 6m23s.
+`run_chartqa_rewriter_rwr.sh` initialized the original
+`chartqa_rewriter_round0_merged`, then used the 37/2 rows built from the new GPT-5
+trajectories. It retained original LoRA rank 64 and alpha 128. The builder used
+beta 4 and max repeats 5. Test overrides used one GPU, batch size 1, accumulation
+1, two steps, SDPA, a 2048-token cutoff, and 262144 maximum image pixels.
 
-## API and untested branches
+| Step | Learning rate | Training loss | Gradient norm | Validation loss |
+| --- | ---: | ---: | ---: | ---: |
+| 1 | 0 | 1.1699 | 1.7555708 | 1.3297648 |
+| 2 | 0.000005 | 1.2070 | 1.5020014 | 1.3304036 |
 
-A real call through the original API Planner entered its fallback path. A
-minimal request with the supplied NVIDIA configuration confirmed HTTP 401
-(`AuthenticationError`). The other supplied provider configuration also produced
-a fallback plan. Neither call completed a validated API table edit; no API
-success is claimed and no credentials or provider response bodies are published.
+Step 1 had zero learning rate because of the original warm-up. In checkpoint 2,
+all 1,024 sampled LoRA-B values were nonzero, with maximum magnitude 5.0064e-6.
+The original `load_best_model_at_end` selected checkpoint 1 because its validation
+loss was lower, so the final adapter root is the first checkpoint, not the
+updated second checkpoint. The validation set has only two examples; this check
+establishes execution and a parameter update, not improved Rewriter quality.
 
-The shared local Planner retains its original scene-oriented prompt/tool list,
-and its untagged-JSON parser does not handle nested parameter objects. The main
-loop also truncates stored questions to 100 characters. These source behaviors
-remain visible rather than being silently repaired. Tier-1 API editing, InternVL
-GRPO, tool-assisted training, optimizer-state resume, and full multi-round
-training were not validated by these checks.
+## Earlier bounded checks
 
-The runtime emitted tokenizer-regex and optional-kernel/process-cleanup warnings.
-Existing dependency versions and tokenizer files were not changed. External
-vLLM plugins were disabled for the Qwen checks.
+- Original Solver GRPO: four steps on the 41,495-record rewritten pool completed
+  successfully; all 1,024 sampled checkpoint values changed.
+- Original Solver SFT: two steps on 1,070 existing SFT rows completed with
+  gradient norms 0.9838 / 1.6094 and training loss 0.6467. Those SFT records are
+  separate from the rewritten-image archive and are not published here.
+- Original Rewriter SFT: two steps on 1,668/88 rows from an existing trajectory
+  shard completed with gradient norms 4.1675 / 4.0783.
+- An existing trained local Rewriter generated two rendered edits in a limited
+  tier-2 check. A separate checkpoint reload evaluated two examples, one matched;
+  this is a reload check, not a benchmark score.
 
-## Publication checks
+## Limits and publication checks
 
-The renamed publication copy passed the original 23 embedded reward cases,
-actual vendored verl reward registration and response-token placement checks,
-and CLI import/help checks for generation and the data builders. Its evaluation
-entry point loaded the saved Solver and processed the same two examples, matching
-the original script's result. The publication validation job exited 0 in 2m34s.
-All 472 included Python files passed Python 3.10 syntax parsing, and shell syntax
-checks passed. The publication scan found no dataset-specific names, credentials,
-or private source-workspace paths. GPU execution of the InternVL and tool paths
-is not implied by these checks.
+The current GPT-5 path succeeded with a working supplied credential. Earlier
+authentication failures with other supplied configurations do not describe this
+successful run; no credentials are included in the release.
+
+The shared local Planner retains its scene-oriented prompt/tool list and original
+untagged-JSON parser limitations. The main loop truncates stored questions to
+100 characters. A newly trained local Rewriter replacing GPT-5 for a complete
+co-evolution cycle remains unvalidated. Full multi-round training, InternVL GRPO,
+tool-assisted training, and optimizer-state resume are also not established.
+
+The runtime emitted tokenizer-regex and optional-kernel/process-cleanup warnings;
+dependencies and tokenizer files were not changed. Original source behavior has
+not been silently repaired to remove warnings or handled editing failures.
+
+Publication validation checks syntax, preserved source hashes, local module
+imports, and the original 23 embedded reward cases. The restored reward is
+byte-identical to the GPU-tested source. Restoring script names does not
+constitute a complete new GPU run of every optional branch.

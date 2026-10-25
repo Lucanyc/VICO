@@ -1,386 +1,414 @@
 {
-  "note": "Original research source with naming, paths and launcher wiring changes only. No replacement reward, feedback loop, or data-selection algorithm.",
+  "note": "Original research filenames, imports, classes, prompts, rewards and training algorithms restored. Only the per-file publication adjustments listed below are applied. The main GRPO launcher uses the active original verl environment; it does not force the vendored framework.",
   "files": [
     {
-      "file": "table_editor.py",
+      "file": "chartqa_scene_generator.py",
       "source_sha256": "7e172813ba0b64dd8a45128d244ca0d6064f2cdde985b9ac00216663123b513a",
-      "published_sha256": "1bfef63dab25c331085b0159cb48d87c3ba49cff27257fd2804b5ff3f8390747",
+      "published_sha256": "1b7dfa00c0c6ec64661622a64b4701e22cd5db8740ad2f74b91d621c0d1db8f3",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "chartqa_scene_generator.py"
     },
     {
-      "file": "table_editor_typed.py",
+      "file": "chartqa_scene_generator_round5.py",
       "source_sha256": "8e89b9e7e807d477a92af63c85be28c145d2db10bc61f72f69dfdc45797d42c0",
-      "published_sha256": "b7233e3283d2cd525a92df0d89456cab4b48692899544f704f62230bbc4147b5",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "8e89b9e7e807d477a92af63c85be28c145d2db10bc61f72f69dfdc45797d42c0",
+      "changes": [],
+      "source_file": "chartqa_scene_generator_round5.py"
     },
     {
-      "file": "reward.py",
+      "file": "chartqa_reward.py",
       "source_sha256": "a8ec266de31c900d27624660b9342e5f8dbd9a76c17c5dc26aaf3655ff1e1c73",
-      "published_sha256": "9d46e3b0ace500cb6320711d9db9bac4135ca3bba1fa2b99c1d96fb839bb2843",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "a8ec266de31c900d27624660b9342e5f8dbd9a76c17c5dc26aaf3655ff1e1c73",
+      "changes": [],
+      "source_file": "chartqa_reward.py"
     },
     {
-      "file": "api_planner.py",
+      "file": "gpt5_planner_chartqa_genenv.py",
       "source_sha256": "34ce06de090b343f294cbbf94f666589c92fa77664b4229b47e0c7f7d7d8e80c",
-      "published_sha256": "a0a7b8d61a617892a308c0f8546cbcdd6fd5b1a40dbf81b00b0438ee6bb5ba58",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "34ce06de090b343f294cbbf94f666589c92fa77664b4229b47e0c7f7d7d8e80c",
+      "changes": [],
+      "source_file": "gpt5_planner_chartqa_genenv.py"
     },
     {
-      "file": "api_planner_calibrated.py",
+      "file": "gpt5_planner_round4_chartqa_genenv.py",
       "source_sha256": "1e8bcc307e1ed342c3899bee4d1d86212eeeab601a439bff4846c42a67a7d029",
-      "published_sha256": "4a5d87d585525b4f4c75306bc4fe4897d384c1e27048eed7f59f27c94a9a9c45",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "1e8bcc307e1ed342c3899bee4d1d86212eeeab601a439bff4846c42a67a7d029",
+      "changes": [],
+      "source_file": "gpt5_planner_round4_chartqa_genenv.py"
     },
     {
-      "file": "local_planner.py",
+      "file": "qwen3vl_planner_clevr.py",
       "source_sha256": "d4d20293d221840286e10c9d7bbbd12e70bc8cb087358a25140a781755efd145",
-      "published_sha256": "e7643e9732d9a2e825cdbd4a1cb5a1c406d165ae04177afaa76262817ce71a37",
+      "published_sha256": "146cdc65b4a78b4f26f17c0aeee2bde1ff1799be75a18493f0864fda19966fde",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "qwen3vl_planner_clevr.py"
     },
     {
-      "file": "run_evolution.py",
+      "file": "planner_executor_loop_chartqa_genenv.py",
       "source_sha256": "49289d66b3cfc53ddc85aa9af2ee1798738cd99f10d51a927b1fe519972e6d6c",
-      "published_sha256": "c45bb78f2015053b23735e04eea196bc06bc5493e54696b0080688c01be69de2",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "49289d66b3cfc53ddc85aa9af2ee1798738cd99f10d51a927b1fe519972e6d6c",
+      "changes": [],
+      "source_file": "planner_executor_loop_chartqa_genenv.py"
     },
     {
-      "file": "run_evolution_continuous.py",
+      "file": "planner_executor_loop_chartqa_genenv_e.py",
       "source_sha256": "c9aafc7631c17a2bc7ce78951c0fae42630dac253924fc6a731dcdd4c55d9e5b",
-      "published_sha256": "dff5b67549cabb0661c2203e5bd1a0f20ff6f08a5bd2151e7c5819c6ab41cd85",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "c9aafc7631c17a2bc7ce78951c0fae42630dac253924fc6a731dcdd4c55d9e5b",
+      "changes": [],
+      "source_file": "planner_executor_loop_chartqa_genenv_e.py"
     },
     {
-      "file": "run_evolution_calibrated.py",
+      "file": "planner_executor_loop_round4_chartqa_genenv.py",
       "source_sha256": "4e952526c6f4645cba66fa972a53df2d8cf3542e7e1eee014773e0848e071c57",
-      "published_sha256": "3aa64e9f01aae71ece34bcc149f44990ea7744c3065d83b37e3b51d36b0fee85",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "4e952526c6f4645cba66fa972a53df2d8cf3542e7e1eee014773e0848e071c57",
+      "changes": [],
+      "source_file": "planner_executor_loop_round4_chartqa_genenv.py"
     },
     {
-      "file": "run_evolution_typed.py",
+      "file": "planner_executor_loop_round5_chartqa_genenv.py",
       "source_sha256": "3caaa890f629ed81bb6470113b44933432121941f849fe1a9c7b08d19e7d93ea",
-      "published_sha256": "62e70815e8001b07eb6fc100d4b850be4e595a9e90f444f8666d526ca23f8705",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "3caaa890f629ed81bb6470113b44933432121941f849fe1a9c7b08d19e7d93ea",
+      "changes": [],
+      "source_file": "planner_executor_loop_round5_chartqa_genenv.py"
     },
     {
-      "file": "build_seed_batch.py",
+      "file": "build_chartqa_round4_batch.py",
       "source_sha256": "5d93ab918277361a7be43305562088d8e838bfa78b6141343187a625c82603b8",
-      "published_sha256": "8f295bac922bc8caad7d28c5a449e5777d7f3dbc7afce26a72ae222bb95ae97e",
+      "published_sha256": "22777f7d0620ff8908a35ce32694c062484394f177e4b24c531529df3ef06443",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "build_chartqa_round4_batch.py"
     },
     {
-      "file": "build_rewriter_data.py",
+      "file": "build_rewriter_rwr_chartqa_data.py",
       "source_sha256": "747303b4b68ac74991a6b8b6b2ebf50495c61569eeeb78653b86cdbf332199fb",
-      "published_sha256": "7d23787fd8d6db0b3b81290391799bee6c0233f6ac0d748c31b3b180e4ce214e",
+      "published_sha256": "b5afe5a10d515eaad4ca8e90e8bf022cbe3baf01ba20b20f7d7b76a4fcde55f9",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "build_rewriter_rwr_chartqa_data.py"
     },
     {
-      "file": "build_solver_data.py",
+      "file": "build_solver_grpo_data_chartqa.py",
       "source_sha256": "c8b523c74fa9c25db66c07ad2d07b8714b7faa446e729f6a9e4c8c8c4a2ed8c8",
-      "published_sha256": "ae4a9e432c9b28ca169487490c54326bb6ab911f6bbcf826e8f8ad3603e613ad",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "c8b523c74fa9c25db66c07ad2d07b8714b7faa446e729f6a9e4c8c8c4a2ed8c8",
+      "changes": [],
+      "source_file": "build_solver_grpo_data_chartqa.py"
     },
     {
-      "file": "build_solver_data_internvl.py",
+      "file": "build_solver_grpo_data_chartqa_vlm-r1.py",
       "source_sha256": "8c79e1ff382e7b342941f4a51b25cddb88fec759ceb8d19b582dddb61fab2771",
-      "published_sha256": "f5aa03747cb9d0bf839d90762c4fe7f4bf47540ad6e140f5117579a53ef29dea",
+      "published_sha256": "834e2a99d69222a0b4529824fa8f97d89da766a1d94766389d059ba41c5a5b0d",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "build_solver_grpo_data_chartqa_vlm-r1.py"
     },
     {
-      "file": "evaluate.py",
+      "file": "eval_chartqa_vanilla.py",
       "source_sha256": "6ac417b9f60726fb6c98e5e29158844f94f0158801941e5a11d00e57e2b13609",
-      "published_sha256": "62b0ef52bc7bd43b6dc8d4793df8ea946aa7053b906288327db0d865632a3219",
+      "published_sha256": "8310aa2d9983b97dc022a9500168f4a4f8e358d7fb6ad1d6e9325dcd5f8f3830",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_chartqa_vanilla.py"
     },
     {
-      "file": "evaluate_answer_tag.py",
+      "file": "eval_chartqa_base.py",
       "source_sha256": "ed60d466095038ebb5a4d8dd6091bb3920f1acc6e37f1a23d75efca625762641",
-      "published_sha256": "05b4c73ca788b6b43f8eeeb799be55248cedd1a0165198d50b9f69b1bc44f8ad",
+      "published_sha256": "721bfd64badbef2b8016342e974fa298a97d82b7318072f7f1d72fe313bfed3a",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_chartqa_base.py"
     },
     {
-      "file": "evaluate_rethink.py",
+      "file": "eval_chartqa_rethinker.py",
       "source_sha256": "525d819bd28da29f575afe204f65b5d16a8814fb1773e164ac3e1e0b094ddc3f",
-      "published_sha256": "f33fb44b3e4b358af29d6e5e115e0a16da1db5a9e2ba7fe294fbc97bd1f765a9",
+      "published_sha256": "da6ef49f81de9c69a8275e10decdc9b264becb15b1e9ba985ff11c7fb7148060",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_chartqa_rethinker.py"
     },
     {
-      "file": "train_rewriter.sh",
+      "file": "run_chartqa_rewriter_rwr.sh",
       "source_sha256": "a3a0aac00726dc7ebcdf63f958eead65a7253b5f67b98d1ad1e95e3d79d2a654",
-      "published_sha256": "819bbeed426c9f24282a7881fd45c57853fb2c803656ea3468c95e17ef589189",
+      "published_sha256": "9e6cde656a8cfa86f165dcf336161c1da52b622bba162b4e07725e6fb9e112d5",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders",
-        "CLI argument forwarding"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "project directory defaults to the script directory; original variable names retained",
+        "forward CLI overrides, as in the completed bounded runtime checks"
+      ],
+      "source_file": "run_chartqa_rewriter_rwr.sh"
     },
     {
-      "file": "train_solver.sh",
+      "file": "run_solver_grpo_chartqa.sh",
       "source_sha256": "2207cb0bb9fc3ad9493392566a24088a9de6d97a78533749232c8493eff07fb5",
-      "published_sha256": "62d748af510b8ac2533b424ddc35eed15c78c03608ce16d45052eda2245f576f",
+      "published_sha256": "e012c8573036d203ce5e466760d86f18cbb0faea80a630f3306945e474b994bb",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders",
-        "repository-local verl and reward registration; CLI argument forwarding; shell tracing disabled"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "project directory defaults to the script directory; original variable names retained",
+        "shell tracing disabled",
+        "forward CLI overrides, as in the completed bounded runtime checks"
+      ],
+      "source_file": "run_solver_grpo_chartqa.sh"
     },
     {
-      "file": "generate_solver_sft_api.py",
+      "file": "generate_solver_sft_data_chartqa_qwen3vl235b_api.py",
       "source_sha256": "5ebfb58bfc3814a1a8ff751d6f7a8d3e9bf879a0001ac92c8ea65873f1039f58",
-      "published_sha256": "5c602192c533bd52d5b17d1534cce31ce2075c2f47ba9e0a1acf7ba1422636ee",
+      "published_sha256": "93f0b92bde69f9be6e2ca0f8b476271c9622b85722da5ec26980cb9214bc9d45",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "generate_solver_sft_data_chartqa_qwen3vl235b_api.py"
     },
     {
-      "file": "generate_solver_sft_local.py",
+      "file": "generate_solver_sft_data_chartqa_qwen3vl235b.py",
       "source_sha256": "01350fe031a40018482163195ecfe183cca8b13f552a4246131bfdc089d8a785",
-      "published_sha256": "d0c29b7d385d253c7b4794adebfc5fcb1aae0f81eb45551e5f69ac3ef8b2acc0",
+      "published_sha256": "7ac076fc619de02624df1c6e9712c1932f7a0494062e83f755295883651e5dd4",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "generate_solver_sft_data_chartqa_qwen3vl235b.py"
     },
     {
-      "file": "build_solver_sft_data.py",
+      "file": "build_solver_sft_data_chartqa.py",
       "source_sha256": "fb7d80338de80f4998e322649b6e82041d16e060feb4ba3e4e5a3dcb2cee7c84",
-      "published_sha256": "e4088536b17b0bb61b0a25d1bb4298e393dc23091d1af02aad901e75bb4f7c25",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "fb7d80338de80f4998e322649b6e82041d16e060feb4ba3e4e5a3dcb2cee7c84",
+      "changes": [],
+      "source_file": "build_solver_sft_data_chartqa.py"
     },
     {
-      "file": "build_solver_sft_thinking_data.py",
+      "file": "build_solver_sft_chartqa_data_qwen3vl235bthinking.py",
       "source_sha256": "05461175dfe679480affb02110d5ddfbc924b81977a0080c2060b495de13defe",
-      "published_sha256": "4df7e0d38bc429d8f9960b3e9ba43dc57b8c959cf8329d121c14cc7a62c053d0",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "05461175dfe679480affb02110d5ddfbc924b81977a0080c2060b495de13defe",
+      "changes": [],
+      "source_file": "build_solver_sft_chartqa_data_qwen3vl235bthinking.py"
     },
     {
-      "file": "train_solver_sft.sh",
+      "file": "run_solver_sft_chartqa.sh",
       "source_sha256": "3542c1444246b9aa1837d4995a108c0d26d786706c00b4c0dab5977d81382023",
-      "published_sha256": "f34b663c9bf6b19180b29247e4c47754f506ac2e820e0bfb69050a6273f7fe08",
+      "published_sha256": "fcfee3fcc80db356aebb1211b309903a2874c089db86a91af1e878847564d109",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders",
-        "CLI argument forwarding"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "project directory defaults to the script directory; original variable names retained",
+        "forward CLI overrides, as in the completed bounded runtime checks"
+      ],
+      "source_file": "run_solver_sft_chartqa.sh"
     },
     {
-      "file": "train_solver_tool.sh",
+      "file": "run_solver_tool_grpo.sh",
       "source_sha256": "50d89711f325d4a683f38508e9e69a4b0df84d2e1bcf857ff823461d9afc7d53",
-      "published_sha256": "e6e74bd855eb846db0b3a43ed16baf074ca766aaf5f6427459590723166e546c",
+      "published_sha256": "370e1ae18ec0944c3fc94cc150431d04096250eca68a143b4ae3cd66bebb0002",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "project directory defaults to the script directory; original variable names retained",
+        "shell tracing disabled",
+        "retain existing publication layout for optional tool framework"
+      ],
+      "source_file": "run_solver_tool_grpo.sh"
     },
     {
-      "file": "build_solver_tool_data.py",
+      "file": "build_solver_tool_grpo_data_chartqa.py",
       "source_sha256": "e5b2a3e3a5f1012525512a75e3b80c370b777c257abf1017dbb2c09678eb6cb4",
-      "published_sha256": "a6c6a78ccdd19b8d5e8ee2b4dca5d5913d12e4545e871990c53f2087103a779d",
+      "published_sha256": "94bd17722cbf2c49673b47e22f0b257a3dbcf5e004d9fb4cd242be56acc40395",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "build_solver_tool_grpo_data_chartqa.py"
     },
     {
-      "file": "evaluate_with_tool.py",
+      "file": "eval_chartqa_with_tool.py",
       "source_sha256": "981d3b81ffeca3e4ec2ea2986c91c54f5432b1f73bc262fa4e4faf28ce238319",
-      "published_sha256": "6b7207cc4a4fba6970adea1778d0ff1550d8be6c1ff679ab44399aaebc9d581f",
+      "published_sha256": "6bbbdcdbbcb2b857b276b461053ae620255e1ebfe7ae57f6949d1d561c8654c6",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_chartqa_with_tool.py"
     },
     {
       "file": "tool_router.py",
       "source_sha256": "5ecab896ce600e95acffc93ec291a694d97e4afba89d94a992a613d2d73358a8",
-      "published_sha256": "f0d6957322c35cf5b1a5d2dc0819b5b4ed0df217c65f7564f637e822d891ce31",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "published_sha256": "5ecab896ce600e95acffc93ec291a694d97e4afba89d94a992a613d2d73358a8",
+      "changes": [],
+      "source_file": "tool_router.py"
     },
     {
       "file": "start_tool_servers.sh",
       "source_sha256": "9d4a1ffdd594675ab2400a85367fa7403041ef84f5c71cbd6294818b600e2e2e",
-      "published_sha256": "8c3f65b803b562140fa0a15cdb77d2aa7510da9247be90c42c5e10ad4f23b0e2",
+      "published_sha256": "d37fc487fe5e30f192189c9c6854d2e680b8c1a0f29b83b8ffe56ea979b8a088",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "project directory defaults to the script directory; original variable names retained",
+        "retain existing publication layout for optional tool framework"
+      ],
+      "source_file": "start_tool_servers.sh"
     },
     {
       "file": "mathvision_inference.py",
       "source_sha256": "ad6dca6f2b2cff6f64333e92f82f7b44bc8e120e768177d65ad7a185a8a761c6",
       "published_sha256": "792c2429902297b6f0c63fe1d722004828400ad997266531ac8b82a0e32b0177",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "mathvision_inference.py"
     },
     {
       "file": "mathvision_inference_internvl_hf.py",
       "source_sha256": "f90f8817781f87916d43df1e0cc22fc843712b0942b9e39b956bda7afc6ed3c6",
       "published_sha256": "f90f8817781f87916d43df1e0cc22fc843712b0942b9e39b956bda7afc6ed3c6",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "changes": [],
+      "source_file": "mathvision_inference_internvl_hf.py"
     },
     {
       "file": "internvl_hf_utils.py",
       "source_sha256": "ac39433d6e8ccbf614bf2b1c312ced43ad4cbf41ba09de47bf322186a1b3dd66",
       "published_sha256": "ac39433d6e8ccbf614bf2b1c312ced43ad4cbf41ba09de47bf322186a1b3dd66",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "changes": [],
+      "source_file": "internvl_hf_utils.py"
     },
     {
       "file": "eval_mathvista.py",
       "source_sha256": "0837ba5cd22a2e2e45374a02dbbde528a359ab1babc7b041ac067c06d80d47b1",
       "published_sha256": "a867635bd8d5c264511d95c314396eafb830d4be33e58f83629808dff4ec9ed3",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_mathvista.py"
     },
     {
       "file": "eval_mathvista_internvl_hf.py",
       "source_sha256": "0bc4af590a918ab005b1f145bc6da50ad769d7179a7c608f028ec7f782950fef",
-      "published_sha256": "72fd7e39224fc794e3eb59c7493d8cff7443613df867b81ecf8f1030f53bfed2",
+      "published_sha256": "7d5c9c4e3daa6ef1b9f45da435bf7fc5ff634f9b5c1b0e594d0e223d7b22b62d",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_mathvista_internvl_hf.py"
     },
     {
       "file": "eval_logicvista-base.py",
       "source_sha256": "92f26abdbd43d44eb77df4ee7e2ddabef9de5cc7d59f5b4e602a50f7543d3bcb",
-      "published_sha256": "7066e75ec8347c107b4891c2bb7c82f13d61e9650c44893349a0e5693676ea5e",
+      "published_sha256": "5e36b931cd1e42748a578be63567b3444f23a634d42c107c3523aa3ce004845d",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_logicvista-base.py"
     },
     {
       "file": "eval_logicvista-base_internvl_hf.py",
       "source_sha256": "73c5f77bd0e3e9587fc5b4d454bf78222ea831c491f17a0828d546c37a80517a",
       "published_sha256": "03fc727fd696b6245333cf67e7cdc0782fce159ad9f64d7e39f2aeeff16253a0",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_logicvista-base_internvl_hf.py"
     },
     {
       "file": "eval_logicvista.py",
       "source_sha256": "675841ada43e7c970b42b81083b33349f9199661991dde5cfb1bed9983c6f23d",
       "published_sha256": "0714ddf70262e67da248f4aad3e8bedfc67caa34c02b0d2df25fc5795ee27a6d",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_logicvista.py"
     },
     {
       "file": "eval_mmmu.py",
       "source_sha256": "94486095d6caf7a4e594c1850a7f4a8d5c23fc115226c0e84df8949d55790503",
       "published_sha256": "94486095d6caf7a4e594c1850a7f4a8d5c23fc115226c0e84df8949d55790503",
-      "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+      "changes": [],
+      "source_file": "eval_mmmu.py"
     },
     {
       "file": "eval_mmmu_trained.py",
       "source_sha256": "e809089783da47429e8f970b2ad9db8831fea051f41ea8894fe389697d58dd2f",
-      "published_sha256": "691a07f2c8bf4a81d5457b118a696c896f43f7ce70cfa0ead9dd85772890135a",
+      "published_sha256": "e52d6581fb28a9dd2768a83d0255a6fbdf8c359f8c80f6cf42cb160d6590cf53",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_mmmu_trained.py"
     },
     {
       "file": "eval_mmvp.py",
       "source_sha256": "97e7ebbd3a225db21ba0aad3ca0115d57edc62aa6cfb8328a0a21f7320c9c9fb",
       "published_sha256": "2953989e1dd301d79c8e6b9a9ef9803e0a5ec682a87f9f3098ed78b0cbda7446",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_mmvp.py"
     },
     {
       "file": "eval_blink.py",
       "source_sha256": "2d4fcbcebb9ebb07655b1fce00fd5c744e29d176ac4e50cd2653c1c0309b2349",
-      "published_sha256": "f1ab479ec12b72da5ddb69668a45223835b2bdbcec6cf23277628781e90737ea",
+      "published_sha256": "bbebd6962b1fdef559def9a08ed5b2342321f996aa0e2277c913484339729ac5",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_blink.py"
     },
     {
-      "file": "inference_mathverse.py",
+      "file": "Trained_solver_inference_mathverse.py",
       "source_sha256": "d7e5426735ff7a4577e4f04095622b31d575362bf5299852bee54aedf530d50c",
-      "published_sha256": "c6f2ca8ceeaa819de6fc2bef25bfe494d16d9b662849868908a69bc142753426",
+      "published_sha256": "3d9828624923174d816666f82bb9ebe6f6e15b93ce6fd9a1112ba05048687b0d",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "Trained_solver_inference_mathverse.py"
     },
     {
-      "file": "inference_mathverse_mathprompt.py",
+      "file": "Trained_solver_inference_mathverse_mathprompt.py",
       "source_sha256": "efe4f5d99d89d2f892debceb27339a63f502c7cdcd6f708e69b0cc77b6bb4fd8",
-      "published_sha256": "d8b9dcd9f8f1c17d92c77463dd1141bff845d072a402c659c7741b422b31d8ea",
+      "published_sha256": "b0a0bf95179040a78d0c016393db1fbbbfe8c4e8c9b19dc223a0f110c3636356",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "Trained_solver_inference_mathverse_mathprompt.py"
     },
     {
-      "file": "inference_mathverse_freeform_hint.py",
+      "file": "Trained_solver_inference_mathverse_freeform_hint.py",
       "source_sha256": "f4cedd6700899aab1d9cfed54a2e2c6699f39cd057a74051f03e684754d9b53e",
-      "published_sha256": "d44dbee22ab27450045aae7b8c3ea6989b0e5e8cac41ace8ec7be20a0e16b4ee",
+      "published_sha256": "c538d29140e9cb4c43834b47440c1b22f9ac2e265e1ef0a7a16d92cf338cc925",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "Trained_solver_inference_mathverse_freeform_hint.py"
     },
     {
-      "file": "inference_wemath.py",
+      "file": "Trained_solver_inference_wemath_clever_trained_model.py",
       "source_sha256": "28bb81f51831aa4e95da2f4970af2ce3f43d3cd4ef7c3077cf5283ea7b561fdb",
-      "published_sha256": "251f0d53be9e66bcd46a9c7da9697f0c0f8f77ade681ec91e492fb85ecf73be6",
+      "published_sha256": "9b2e5392f0ee207ba0ae792a7b3eca10e729c9c9bee2041e7810602ec8ae162e",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "Trained_solver_inference_wemath_clever_trained_model.py"
     },
     {
-      "file": "vendor/VLM-R1/run_scripts/train_solver_internvl.sh",
+      "file": "vendor/VLM-R1/run_scripts/run_grpo_chartqa_internvl_vlm-r1.sh",
       "source_sha256": "369c51ad1c41328f0169ab9c61b746668db452261cfdb7565843475711c55a2c",
-      "published_sha256": "d1f716ddf5dee179e6a4bbdf07563b48eea38b76eb1f14b8334be6df237bbc29",
+      "published_sha256": "2d73a976a2eacfa6362b85c3276b93165b011f51b7924546af0ecc9fbd91a9ca",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders",
-        "model and training data paths supplied through environment variables"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "shell tracing disabled",
+        "external model and training data supplied through MODEL_PATH and TRAIN_FILE"
+      ],
+      "source_file": "VLM-R1/run_scripts/run_grpo_chartqa_internvl_vlm-r1.sh"
     },
     {
-      "file": "vendor/VLM-R1/run_scripts/train_solver_internvl_14b.sh",
+      "file": "vendor/VLM-R1/run_scripts/run_grpo_chartqa_internvl_vlm-r1_14b.sh",
       "source_sha256": "f1b5ef0b46f0af4fe791e97b95c6ef5e7e11c4d364692cb3ed99d024f8470429",
-      "published_sha256": "e1925bc41936647d331b8269df5a0658435919154829d20f049db287cdd13d19",
+      "published_sha256": "6b910cf08dd73ab63084c03b3f3da085292252c79dbb599c363a860192359edd",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders",
-        "model and training data paths supplied through environment variables"
-      ]
+        "machine-specific paths replaced with /path/to placeholders",
+        "shell tracing disabled",
+        "external model and training data supplied through MODEL_PATH and TRAIN_FILE"
+      ],
+      "source_file": "VLM-R1/run_scripts/run_grpo_chartqa_internvl_vlm-r1_14b.sh"
     },
     {
       "file": "vendor/VLM-R1/src/open-r1-multimodal/LICENSE",
@@ -473,9 +501,10 @@
     {
       "file": "vendor/VLM-R1/src/open-r1-multimodal/src/open_r1/grpo_jsonl.py",
       "source_sha256": "967112cd0987ff9bcfb9c7ea1e7206ce85a156d4e01d1a330f5853f90b8c31b6",
-      "published_sha256": "967112cd0987ff9bcfb9c7ea1e7206ce85a156d4e01d1a330f5853f90b8c31b6",
+      "published_sha256": "0cc5e597d84113aad31745b203f23c0a628349566c7d992a0747095331a0fb5b",
       "changes": [
-        "dataset and module naming; machine-specific path placeholders"
+        "dataset and module naming; machine-specific path placeholders",
+        "remove hard-coded API credential default; read OPENAI_API_KEY from environment"
       ]
     },
     {
@@ -3402,18 +3431,18 @@
     {
       "file": "eval_mathvista_internvl.py",
       "source_sha256": "323a9d0e199ccf9db1e979d1ae6016a6d475b13faa80ca966927d1520b4c0d6d",
-      "published_sha256": "652884965e1e18668b128565b1b048ca2aac99633456d1ad817ab18f98412805",
+      "published_sha256": "97bfda88d43779317a8d67cdde3a58199a1ca76457a46e7782cc31a4d290392f",
       "changes": [
-        "module naming and path portability only"
-      ]
+        "machine-specific paths replaced with /path/to placeholders"
+      ],
+      "source_file": "eval_mathvista_internvl.py"
     },
     {
       "file": "vl_reasoning_qwen3.py",
       "source_sha256": "11deb327dfc353c570ed599b63bc6ec976527bc09157883f3cca2b2cbf195ec7",
       "published_sha256": "11deb327dfc353c570ed599b63bc6ec976527bc09157883f3cca2b2cbf195ec7",
-      "changes": [
-        "module naming and path portability only"
-      ]
+      "changes": [],
+      "source_file": "vl_reasoning_qwen3.py"
     },
     {
       "file": "vendor/verl-tool/verl_tool/__init__.py",

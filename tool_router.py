@@ -119,7 +119,7 @@ def normalize_tool_call(action: str) -> str:
     if tool in ('sam3_detect', 'sam3', 'detect'):
         queries = params.get('queries', [])
         if not queries:
-            # Default queries for SCENE-style scenes
+            # Default queries for CLEVR-style scenes
             queries = ["cube", "sphere", "cylinder"]
         normalized = json.dumps({"tool": "sam3_detect", "queries": queries})
         return action.replace(matches[0], normalized)

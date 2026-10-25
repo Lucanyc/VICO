@@ -12,9 +12,9 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 
-VICO_DIR=${VICO_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
-VERL_TOOL_DIR="${VERL_TOOL_DIR:-${VICO_DIR}/vendor/verl-tool}"
-LOG_DIR="${VICO_DIR}/tool_server_logs"
+COEVOLVE_DIR=${COEVOLVE_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)}
+VERL_TOOL_DIR="${VERL_TOOL_DIR:-${COEVOLVE_DIR}/vendor/verl-tool}"
+LOG_DIR="${COEVOLVE_DIR}/tool_server_logs"
 mkdir -p "${LOG_DIR}"
 
 # ─── Stop mode ───
@@ -90,7 +90,7 @@ echo "  PID: $!, log: ${LOG_DIR}/pixel_reasoner.log"
 if [ "${1:-}" = "router" ] || [ "${1:-all}" = "all" ] || [ -z "${1:-}" ]; then
     echo ""
     echo "Starting Router (port 5556)..."
-    cd ${VICO_DIR}
+    cd ${COEVOLVE_DIR}
     pip install aiohttp 2>/dev/null || true
     nohup python tool_router.py > ${LOG_DIR}/router.log 2>&1 &
     echo "  PID: $!, log: ${LOG_DIR}/router.log"

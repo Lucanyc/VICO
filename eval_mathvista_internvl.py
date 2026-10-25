@@ -3,7 +3,7 @@
 Evaluate on MathVista testmini — InternVL adapted.
 
 Adds InternVL3-8B support via the MODEL_ALIASES / resolve_model /
-mm_kwargs_for helpers (see evaluate.py for the canonical pattern).
+mm_kwargs_for helpers (see eval_chartqa_vanilla.py for the canonical pattern).
 
 Usage:
     CUDA_VISIBLE_DEVICES=0 python3 eval_mathvista_internvl.py \\

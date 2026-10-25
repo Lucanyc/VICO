@@ -3,7 +3,7 @@
 Evaluate trained (co-evolve) solver models on MMMU.
 
 Optimized specifically for models trained with <think>...</think><answer>...</answer>
-format (e.g. round_3/solver_genenv_merged_step210, vico_round3_solver_merged_step110).
+format (e.g. round_3/solver_genenv_merged_step210, chartqa_round3_solver_merged_step110).
 
 Improvements over eval_mmmu.py (borrowed from eval_mathvista.py):
   1. MathVista-style prompt with explicit format hint ("...at the end").
@@ -26,10 +26,10 @@ Usage:
 
     # With LLM judge
     CUDA_VISIBLE_DEVICES=0,1 python3 eval_mmmu_trained.py \\
-        --model_path .../vico_round3_solver_merged_step110 \\
+        --model_path .../chartqa_round3_solver_merged_step110 \\
         --tp 2 --prompt_style answer_tag --split validation \\
         --use_llm_judge --judge_model gpt-5-4 --judge_api_key $OPENAI_API_KEY \\
-        --output eval_mmmu_vico110.json
+        --output eval_mmmu_chartqa110.json
 """
 
 import os, json, re, ast, random, argparse, time
@@ -186,7 +186,7 @@ OPEN_HINT = (
 )
 
 # Compact system prompt matching trained <think>/<answer> distribution,
-# but kept shorter than training-time system to avoid over-biasing on SCENE/VICO.
+# but kept shorter than training-time system to avoid over-biasing on CLEVR/ChartQA.
 ANSWER_TAG_SYS = (
     "You are a helpful assistant. Think step by step in <think>...</think> tags, "
     "then give the final answer in <answer>...</answer> tags."

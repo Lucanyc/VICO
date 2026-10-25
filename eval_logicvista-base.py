@@ -3,7 +3,7 @@
 Evaluate on LogicVista with the SIMPLE boxed prompt only.
 
 The appended instruction is exactly the one used in Direct-GRPO training so
-this script is the matching evaluator for the Direct-GRPO VICO checkpoint
+this script is the matching evaluator for the Direct-GRPO ChartQA checkpoint
 (and any base model tested under the same prompt):
 
     "Please answer the question and put the final answer to \\boxed{}"
@@ -18,7 +18,7 @@ Usage:
 
     CUDA_VISIBLE_DEVICES=0,1,2,3 python3 eval_logicvista-base.py \\
         --model_path /path/to/VICO/Direct_GRPO/\\
-direct_grpo_vico_ckpt/global_step_20/hf \\
+direct_grpo_chartqa_ckpt/global_step_20/hf \\
         --tp 4 \\
         --output eval_logicvista_directgrpo_step20_results.json
 """

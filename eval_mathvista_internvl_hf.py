@@ -7,7 +7,7 @@ checkpoint while HF works fine; this script bypasses vLLM. Slower but correct.
 
 Usage:
     CUDA_VISIBLE_DEVICES=3 python3 eval_mathvista_internvl_hf.py \\
-        --model_path /path/to/VICO/internvl_trained_model/vico_internvl3-8b_solver_merged \\
+        --model_path /path/to/VICO/internvl_trained_model/chartqa_internvl3-8b_solver_merged \\
         --data_json  /path/to/dataset/mathvista/mathvista_testmini.json \\
         --image_root /path/to/dataset/mathvista \\
         --prompt_style answer_tag
