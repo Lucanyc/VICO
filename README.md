@@ -66,7 +66,7 @@ input JSON; use independent working directories and copied inputs.
 
 The Solver receives **+1** when its extracted answer is correct and all four
 thinking/answer tag strings are present; otherwise it receives **-1**. Numeric
-answers use 5% relative tolerance and the original near-zero rule. Rewriter RWR
+answers and the original near-zero rule. Rewriter RWR
 uses `exp(-beta * (p_hat - 0.5)^2)` and stochastic sample repetition, favoring
 edits near 50% Solver success.
 
