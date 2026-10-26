@@ -62,8 +62,8 @@ VICO/
 │   ├── run_evolution.py         # Planner → editor → Solver loop
 │   ├── api_planner.py           # API Planner
 │   ├── local_planner.py         # Local Rewriter inference
-│   ├── table_editor.py          # Table editing, rendering, answer extraction
-│   └── evaluate.py             # Solver evaluation
+│   └── table_editor.py          # Table editing, rendering, answer extraction
+│   
 ├── sft/                        # Supervised training
 │   ├── generate_solver_sft.py   # Teacher-generated Solver reasoning
 │   ├── build_solver_sft_data.py # Solver SFT data
@@ -125,19 +125,6 @@ Seed records need the original `tier` and `answer_cell` metadata. Saved
 trajectories contain editing actions, generated image paths, recomputed answers,
 and Solver feedback. [Run commands](docs/RUN_COMMANDS.md) give the full bounded
 workflow and resume options.
-
-## Evaluation
-
-The evaluator reads `id`, `image_path`, `question`, and `answer` fields from JSON
-records and reports answer correctness using the original extraction/matching
-rules. This metric is separate from the format-and-answer training reward.
-
-```bash
-CUDA_VISIBLE_DEVICES=0 python3 vico/evaluate.py \
-  --model_path /path/to/solver --data_json /path/to/test.json \
-  --image_root /path/to/images --tp 1 \
-  --output outputs/evaluation.json
-```
 
 ## SFT training
 
