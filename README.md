@@ -203,6 +203,4 @@ the 13 implementation hashes.
 
 Training builds on [verl](https://github.com/volcengine/verl) and
 [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory); inference uses
-[vLLM](https://github.com/vllm-project/vllm). Repository organization follows the
-generation/evaluation and SFT/RL presentation of
-[PEDIA](https://github.com/antoinegg1/PEDIA).
+[vLLM](https://github.com/vllm-project/vllm).
