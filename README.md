@@ -27,7 +27,6 @@ charts; another visual environment needs its own editor and answer rules.
 - [Generation](#generation)
 - [SFT training](#sft-training)
 - [RL training](#rl-training)
-- [Validation](#validation)
 - [Acknowledgments](#acknowledgments)
 
 ## Method overview
