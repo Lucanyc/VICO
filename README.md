@@ -43,7 +43,7 @@ flowchart LR
     Editor --> Trajectories[Saved editing trajectories]
     Feedback --> Trajectories
     Trajectories --> RWR[Rewriter RWR / SFT]
-    Trajectories --> GRPO[Solver GRPO]
+    Trajectories --∂> GRPO[Solver GRPO]
     RWR -. next round .-> Planner
     GRPO -. next round .-> Solver
 ```
