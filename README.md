@@ -33,21 +33,6 @@ charts; another visual environment needs its own editor and answer rules.
 
 ## Method overview
 
-```mermaid
-flowchart LR
-    Seeds[Seed images and tables] --> Planner[API or local Planner]
-    Planner --> Editor[Execute edit and render image]
-    Editor --> Solver[Solver rollouts]
-    Solver --> Feedback[Difficulty feedback]
-    Feedback --> Planner
-    Editor --> Trajectories[Saved editing trajectories]
-    Feedback --> Trajectories
-    Trajectories --> RWR[Rewriter RWR / SFT]
-    Trajectories --∂> GRPO[Solver GRPO]
-    RWR -. next round .-> Planner
-    GRPO -. next round .-> Solver
-```
-
 The API-Planner route has been exercised through generation, data construction,
 and bounded training runs. The retained local Planner has source limitations;
 a complete cycle replacing the API Planner with the newly trained Rewriter
