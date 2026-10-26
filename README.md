@@ -1,4 +1,4 @@
-<h1 align="center">VICO</h1>
+<h1 align="center">VICO:Visual Environments Co-Evolving for Vision-Language Model Reasoning</h1>
 <p align="center"><b>Co-evolving visual environments, Rewriters, and Solvers</b></p>
 <p align="center">
   <a href="https://arxiv.org/abs/2610.10782">Paper</a> ·
