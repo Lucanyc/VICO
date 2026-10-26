@@ -33,9 +33,9 @@ charts; another visual environment needs its own editor and answer rules.
 
 ## Method overview
 
-The API-Planner route has been exercised through generation, data construction,
+The Planner route has been exercised through generation, data construction,
 and bounded training runs. The retained local Planner has source limitations;
-a complete cycle replacing the API Planner with the newly trained Rewriter
+a complete cycle replacing the Planner with the newly trained Rewriter
 remains unvalidated. See [validation details](docs/VALIDATION.md).
 
 ## Repository structure
