@@ -19,6 +19,12 @@ This release organizes the original research implementations into generation,
 evaluation, SFT, and RL modules. The included editor operates on CSV-backed
 charts; another visual environment needs its own editor and answer rules.
 
+## Abstract 
+Reinforcement learning with verifiable rewards (RLVR) has become a standard recipe for post-training vision-language models (VLMs), but it typically assumes a static training environment. 
+As the actor improves, fixed tasks drift out of its learning frontier: many become trivial, others remain unsolvable; and the learning signal collapses. We argue that VLM post-training should evolve the visual environment alongside the actor, not just the actor itself. We propose VICO, a co-evolutionary framework in which an \emph{actor} and an \emph{Environment-as-Rewriter} (EnvRewriter) are trained jointly: the EnvRewriter edits verifiable image-side structures, such as scene graphs, chart tables, or protected region masks, and re-renders them to produce label-valid training samples whose difficulty is calibrated to the actor's current ability through a pass-rate-based reward. 
+This loop continuously realigns task difficulty with actor capability without any additional human annotation. 
+Across nine multimodal benchmarks spanning mathematical reasoning and visually grounded understanding, VICO-8B improves over its base model by up to \textbf{+5.0\%} on out-of-domain tasks, surpasses the strongest self-evolution and text-editing co-evolution baselines by \textbf{+4.3\%} and \textbf{+8.4\%} respectively, and stays comparable to chart-specialized RLVR methods using \textbf{16–160× fewer labeled samples}. By shifting from human-labeled supervision to image-editing co-evolution, VICO offers a scalable path beyond static-corpus RLVR for visual reasoning
+
 ## Contents
 
 - [Method overview](#method-overview)
