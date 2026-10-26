@@ -25,7 +25,6 @@ charts; another visual environment needs its own editor and answer rules.
 - [Repository structure](#repository-structure)
 - [Installation](#installation)
 - [Generation](#generation)
-- [Evaluation](#evaluation)
 - [SFT training](#sft-training)
 - [RL training](#rl-training)
 - [Data and models](#data-and-models)
