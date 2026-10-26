@@ -178,16 +178,6 @@ matching and near-zero rules.
 The examples above start training with the source defaults. For the verified
 two-step caps and resource overrides, use [bounded run commands](docs/RUN_COMMANDS.md).
 
-## Data and models
-
-Models and datasets are supplied separately. This code repository contains no
-weights, training data, generated images, or raw experiment logs.
-
-The separate rewritten archive has **41,495 QA records** and **41,481 generated
-images** from 16 source runs, excluding original seed images. Its schema and
-conversion instructions are in [data notes](docs/DATA.md). Rewriter training also
-needs editing trajectories and the images originally shown to the Planner.
-
 ## Validation
 
 The original reference experiment generated 17 valid edits from four seeds and
