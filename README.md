@@ -27,7 +27,6 @@ charts; another visual environment needs its own editor and answer rules.
 - [Generation](#generation)
 - [SFT training](#sft-training)
 - [RL training](#rl-training)
-- [Data and models](#data-and-models)
 - [Validation](#validation)
 - [Acknowledgments](#acknowledgments)
 
