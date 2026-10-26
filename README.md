@@ -178,17 +178,6 @@ matching and near-zero rules.
 The examples above start training with the source defaults. For the verified
 two-step caps and resource overrides, use [bounded run commands](docs/RUN_COMMANDS.md).
 
-## Validation
-
-The original reference experiment generated 17 valid edits from four seeds and
-completed two Solver GRPO steps and two Rewriter SFT steps. Mean Solver rewards
-were 0.5972 and 0.7014. These are bounded execution checks; they do not establish
-benchmark improvements or a completed multi-round training run.
-
-See [validation notes](docs/VALIDATION.md) for reward counts, parameter updates,
-and limits. CI checks source syntax, all 23 original embedded reward cases, and
-the 13 implementation hashes.
-
 ## Acknowledgments
 
 Training builds on [verl](https://github.com/volcengine/verl) and
